@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>一起听</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;overflow:hidden;background:#f4f3f1}
+  body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans CJK SC",sans-serif;
+    -webkit-text-size-adjust:100%;animation:pin .6s ease both}
+  @keyframes pin{from{opacity:0}to{opacity:1}}
+
+  .frame{position:absolute;inset:0;width:100%;height:100%;border:0;background:#f4f3f1;z-index:1}
+
+  .bk{position:fixed;left:12px;top:calc(env(safe-area-inset-top) + 14px);z-index:9;
+    width:34px;height:34px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;text-decoration:none;
+    color:#5d5a56;background:rgba(255,255,255,.72);
+    border:1px solid rgba(160,156,150,.28);
+    box-shadow:0 2px 8px rgba(90,86,80,.12);
+    backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+  .bk{display:none}   /* 播放器自己有顶栏返回，外层这颗只会在它上面叠出一团影子 */
+  .bk svg{width:15px;height:15px;display:block}
+
+  .wait{position:absolute;inset:0;z-index:2;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:.9rem;background:#f4f3f1}
+  .wait.off{display:none}
+  .src{position:fixed;right:12px;bottom:calc(env(safe-area-inset-bottom) + 9px);z-index:8;
+    font-size:9px;letter-spacing:.06em;color:rgba(120,118,114,.62);pointer-events:none;
+    text-shadow:0 1px 2px rgba(255,255,255,.5)}
+  .wait .tx{font-size:11px;letter-spacing:.18em;text-indent:.18em;color:#a8a49e}
+  .wait button{border:1px solid rgba(160,156,150,.32);background:#fff;color:#6b6761;
+    font-family:inherit;font-size:10.5px;letter-spacing:.16em;text-indent:.16em;
+    padding:.42rem .9rem;border-radius:999px}
+</style>
+</head>
+<body>
+
+<div class="wait" id="wait">
+  <span class="tx" id="wtx">在 接 上 唱 片 机</span>
+  <button id="retry">重 新 试 一 次</button>
+</div>
+
+<a class="bk" href="inner.html" aria-label="返回" onclick="location.href='inner.html';return false;">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+</a>
+
+<div class="src">Music-MCP-Netease · Anko3o</div>
+<iframe class="frame" id="fr" src="http://127.0.0.1:9090/?vesper=1&v=5" allow="autoplay; fullscreen"></iframe>
+
+<script>
+(function(){
+  var SRC='http://127.0.0.1:9090/?vesper=1&v=5';
+  var fr=document.getElementById('fr'), wait=document.getElementById('wait'), wtx=document.getElementById('wtx');
+  var done=false;
+  fr.addEventListener('load', function(){ done=true; wait.classList.add('off'); });
+  setTimeout(function(){ if(!done) wtx.textContent='唱 片 机 没 有 转'; }, 6000);
+  window.addEventListener('message', function(ev){
+    var d=ev.data||{};
+    if(d.type==='music:close'){ location.href='inner.html'; }
+  });
+  document.getElementById('retry').addEventListener('click', function(){
+    wait.classList.remove('off'); done=false;
+    fr.src=SRC+'&t='+Date.now();
+  });
+})();
+</script>
+<script>
+
+
+</script>
+</body>
+</html>

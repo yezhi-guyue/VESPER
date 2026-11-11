@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>礼物</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;overflow:hidden;background:#0b0f13}
+  iframe{position:fixed;inset:0;width:100%;height:100%;border:0;background:#0b0f13}
+  .bar{
+    position:fixed;top:0;left:0;right:0;z-index:9;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:calc(2vh + env(safe-area-inset-top)) 6vw 1rem;
+    font:300 9.5px/1 -apple-system,"PingFang SC",sans-serif;
+    letter-spacing:.3em;color:rgba(255,255,255,.7);
+    background:linear-gradient(rgba(0,0,0,.42),rgba(0,0,0,0));
+  }
+  .bar span{cursor:pointer;padding:6px 0}
+  .bar span:active{color:#fff}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <span id="back">关 掉</span>
+  <span id="name"></span>
+</div>
+
+<iframe id="fr" src="about:blank"></iframe>
+
+<script>
+(function(){
+  const GKEY='hearth_gifts';
+  const q=new URLSearchParams(location.search);
+  const id=q.get('id');
+  let gifts=[];
+  try{ gifts=JSON.parse(localStorage.getItem(GKEY)||'[]')||[]; }catch(e){}
+  const g=gifts.find(function(x){ return x.id===id; });
+  const fr=document.getElementById('fr');
+
+  if(!g){
+    document.body.innerHTML='<div style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.5);font:300 10px/1 -apple-system,sans-serif;letter-spacing:.3em">这 个 礼 物 不 见 了</div>';
+    setTimeout(function(){ location.href='gift.html'; },1400);
+    return;
+  }
+
+  document.getElementById('name').textContent=g.name;
+  document.getElementById('back').addEventListener('click',function(){
+    location.href='gift.html';
+  });
+  fr.srcdoc=g.code;
+})();
+</script>
+<script>
+
+
+</script>
+</body>
+</html>

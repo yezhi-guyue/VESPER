@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>家</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    display:flex;align-items:center;justify-content:center;
+    background:linear-gradient(180deg,#fffdfb 0%,#fdf8f2 60%,#fbf5ee 100%);
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans CJK SC",sans-serif;
+    font-weight:200;color:#8a847c;
+  }
+  .box{text-align:center}
+  .box .t{font-size:11px;letter-spacing:.4em;color:#b0a79c}
+  .box a{
+    display:inline-block;margin-top:1.2rem;
+    font-size:10px;letter-spacing:.32em;color:#9a9188;
+    text-decoration:none;padding:.7rem 1.4rem;
+    border:1px solid rgba(150,135,120,.16);border-radius:999px;
+  }
+</style>
+</head>
+<body>
+  <div class="box">
+    <div class="t">推 门</div>
+    <a href="pages/index.html">进 去</a>
+  </div>
+  <script>
+    setTimeout(function(){ location.replace('pages/index.html'); }, 260);
+  </script>
+</body>
+</html>

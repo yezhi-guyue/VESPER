@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>潮信</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html{min-height:100%;background:#fdf8f9}
+  body{min-height:100vh;color:#2a2224;font-weight:300;
+    background:linear-gradient(180deg,#fdf6f8 0%,#fdf8f9 34vh,#fdf8f9 100%);
+    background-color:#fdf8f9;background-attachment:fixed;
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans CJK SC",sans-serif;
+    touch-action:pan-y;-webkit-text-size-adjust:100%;
+    animation:pin .4s cubic-bezier(.22,1,.36,1) both}
+  @keyframes pin{from{opacity:0;transform:scale(1.012)}to{opacity:1;transform:none}}
+
+  .bk{position:fixed;left:12px;top:14px;z-index:9;width:34px;height:34px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;text-decoration:none;
+    color:#8b5f68;background:rgba(255,255,255,.72);border:1px solid rgba(200,160,170,.42);
+    box-shadow:0 6px 16px -12px rgba(120,60,70,.6)}
+  .bk svg{width:15px;height:15px;display:block}
+  .bk2{top:56px}
+
+  .hero{padding:2.5rem 6vw 1.15rem;
+    background:linear-gradient(180deg,#fdeef1 0%,#fdf4f6 55%,#fdf8f9 100%);
+    border-bottom:1px solid rgba(214,168,178,.2)}
+  .mark{width:54px;height:54px;margin:0 auto .55rem;position:relative}
+  .pname{text-align:center;font-size:12px;letter-spacing:.6em;padding-left:.6em;
+    color:#b3878f;margin:0 0 1rem;font-weight:300}
+  .mark svg{width:100%;height:100%;display:block}
+  .sbox{display:flex;align-items:center;gap:.55rem;height:38px;padding:0 1rem;border-radius:999px;
+    background:rgba(255,255,255,.88);border:1px solid rgba(214,168,178,.42)}
+  .sbox input{flex:1;min-width:0;border:0;background:none;outline:none;font-family:inherit;
+    font-size:11px;letter-spacing:.1em;color:#6d545c}
+  .sbox input::placeholder{color:#c9aeb4}
+  .sbox b{font-size:9px;letter-spacing:.14em;color:#a87c86;font-weight:400;flex:none}
+
+  .years{padding:1rem 6vw 3.4rem}
+  .yb{display:flex;align-items:center;gap:.62rem;margin:1.05rem 0 .72rem}
+  .yb i{flex:1;height:1px;background:rgba(200,170,178,.34)}
+  .yb span{font-size:9.5px;letter-spacing:.22em;color:#ab8b93;white-space:nowrap}
+  .yb:first-child{margin-top:.2rem}
+  .yb em{font-style:normal;font-size:9px;color:#bda0a7;transition:transform .25s ease;flex:none}
+  .ygrp.fold .yb em{transform:rotate(-90deg)}
+  .ygrp.fold .mc{display:none}
+
+  .mc{padding:.82rem .95rem;border-radius:16px;margin-bottom:.55rem;
+    background:linear-gradient(160deg,#fef7f8,#fbeaee);
+    border:1px solid rgba(214,168,178,.34);
+    box-shadow:0 12px 26px -22px rgba(120,60,70,.6)}
+  .mc .mt{font-size:11px;letter-spacing:.16em;color:#8b5f68}
+  .mc .ml{margin-top:.32rem;font-size:11px;color:#6d545c;letter-spacing:.02em}
+  .mc .ms{margin-top:.24rem;font-size:8.5px;letter-spacing:.04em;color:#ad8f96;line-height:1.5}
+  .mc .mp{margin-top:.26rem;font-size:8.5px;color:#b3949c}
+  .mc .mn{margin-top:.32rem;padding-top:.3rem;border-top:1px dashed rgba(200,170,178,.35);
+    font-size:8.5px;line-height:1.55;color:#a8899a;word-break:break-all}
+  .mc.live{border-style:dashed}
+  .mc.skip{background:linear-gradient(160deg,#fefafb,#f9eff1);border:1px solid rgba(206,158,166,.45)}
+  .mc.skip .mt{color:#8b6f74}
+  .mc.skip .np{margin-top:.36rem;font-size:13px;letter-spacing:.14em;color:#a8616d}
+  .mc.skip .ms{margin-top:.24rem;color:#bfaeb1}
+  .empty{padding:3.2rem 0;text-align:center;font-size:11px;letter-spacing:.16em;color:#c6aab0}
+
+  .mask{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;
+    background:rgba(60,30,38,.34);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+  .mask.on{display:flex}
+  .box{width:86vw;max-width:340px;padding:1.2rem 1.1rem .85rem;border-radius:16px;
+    background:linear-gradient(180deg,#fdf6f8,#fbecef);border:1px solid rgba(214,168,178,.42);
+    box-shadow:0 22px 50px -24px rgba(60,30,38,.5)}
+  .box .ttl{font-size:10px;letter-spacing:.22em;color:#8b5f68;text-align:center}
+  .dlist{margin-top:.8rem;max-height:48vh;overflow-y:auto}
+  .drow{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;
+    padding:.44rem .1rem;border-bottom:1px solid rgba(200,170,178,.18)}
+  .drow .nbrow{display:none;flex-basis:100%;margin-top:.36rem;padding:.45rem .6rem;
+    border-radius:9px;background:rgba(255,255,255,.8);border:1px solid rgba(200,170,178,.28);
+    font-size:9.5px;line-height:1.75;color:#3d3234;letter-spacing:.02em;word-break:break-all}
+  .drow .nbrow.empty{color:#8d7c80}
+  .drow.open .nbrow{display:block}
+  .dfold{margin:.55rem 0;padding:.48rem .4rem;border-radius:9px;text-align:center;cursor:pointer;
+    font-size:8.5px;letter-spacing:.12em;color:#a5838b;background:rgba(255,255,255,.62);
+    border:1px dashed rgba(200,170,178,.38)}
+  .dsub{display:none;margin-top:.2rem;padding-left:.2rem;border-left:1px solid rgba(200,170,178,.3)}
+  .dsub.on{display:block}
+  .drow b{font-weight:400;font-size:10px;color:#5c4a4f;letter-spacing:.04em}
+  .drow span{font-size:9px;letter-spacing:.06em;color:#a08289}
+  .drow span.no{color:#cdb8bc}
+  .drow .dr{display:flex;flex-direction:column;align-items:flex-end;gap:2px;max-width:62%}
+  .drow .dr em{font-style:normal;font-size:8.5px;line-height:1.5;color:#b09098;text-align:right;word-break:break-all}
+  .drow.open{background:rgba(255,255,255,.5)}
+  .foot{margin-top:.7rem;text-align:center}
+  .foot span{font-size:9px;letter-spacing:.26em;color:#8a7c7f}
+</style>
+</head>
+<body>
+
+<a class="bk" href="inner.html" aria-label="主页"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4.4 10.6 12 4.6l7.6 6v8.3a1.3 1.3 0 0 1-1.3 1.3H5.7a1.3 1.3 0 0 1-1.3-1.3z"/><path d="M9.7 20.2v-4.5h4.6v4.5"/></svg></a>
+
+<a class="bk bk2" href="calendar.html" aria-label="日历"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12H5.2"/><path d="M10.6 6.4 5 12l5.6 5.6"/></svg></a>
+
+<div class="hero">
+  <div class="mark">
+    <svg viewBox="0 0 60 60" fill="none">
+      <circle cx="30" cy="30" r="27" stroke="rgba(178,126,140,.72)" stroke-width="1.1"/>
+      <path d="M30 16.5c4.6 5.2 7.3 9 7.3 12.7a7.3 7.3 0 1 1-14.6 0c0-3.7 2.7-7.5 7.3-12.7z"
+        stroke="#a9647a" stroke-width="1.55" stroke-linejoin="round"/>
+      <path d="M30 42.5v3" stroke="rgba(196,150,162,.7)" stroke-width="1.2" stroke-linecap="round"/>
+    </svg>
+  </div>
+  <div class="pname">潮信</div>
+  <div class="sbox">
+    <input id="q" type="text" inputmode="search" autocomplete="off" placeholder="2026 或 11月">
+    <b id="qGo">找</b>
+  </div>
+</div>
+
+<div class="years" id="years"></div>
+
+<div class="mask" id="dmask">
+  <div class="box">
+    <div class="ttl" id="dTtl">—</div>
+    <div class="dlist" id="dList"></div>
+    <div class="foot"><span id="dClose">收 起</span></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var PKEY='hearth_period';
+  var PER={cycle:28,days:5,history:[]};
+  try{
+    var _p=JSON.parse(localStorage.getItem(PKEY)||'');
+    if(_p){
+      if(Array.isArray(_p.history)) PER.history=_p.history.filter(function(h){ return h&&h.start; });
+      else if(Array.isArray(_p.starts)){
+        var _L=+(_p.days||_p.len)||5;
+        PER.history=_p.starts.map(function(x,i){
+          var dt=new Date(x);
+          dt.setDate(dt.getDate()+_L-1);
+          var e=dt.getFullYear()+'-'+pad(dt.getMonth()+1)+'-'+pad(dt.getDate());
+          return {id:'p'+i,start:x,startTime:'',end:e,endTime:'',days:{},odd:0};
+        });
+      }
+      if(+_p.days) PER.days=+_p.days;
+    }
+  }catch(e){}
+  function pad(n){ return (n<10?'0':'')+n; }
+
+  function dn(k){ var p=String(k).split('-'); return Math.round(new Date(+p[0],+p[1]-1,+p[2]).getTime()/86400000); }
+  function kOf(n){ var d=new Date(n*86400000); return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+  function mdOf(n){ var d=new Date(n*86400000); return pad(d.getMonth()+1)+'.'+pad(d.getDate()); }
+  var WD=['日','一','二','三','四','五','六'];
+  function todayN(){ var d=new Date(); d.setHours(0,0,0,0); return Math.round(d.getTime()/86400000); }
+  function painTxt(v){ var t=['不疼','一点点','能忍','很疼','难受']; return (v===undefined||v===null||v<0)?'\u2014':(t[v]||'\u2014'); }
+  function flowTxt(v){ var t=['\u2014','少','中','多']; return t[v]||'\u2014'; }
+  function perList(){ return PER.history.slice().sort(function(x,y){ return String(x.start).localeCompare(String(y.start)); }); }
+  function monthRecs(mk){ return perList().filter(function(x){ return String(x.start).slice(0,7)===mk; }); }
+  function statLine(ps,fs){
+    var out='';
+    if(ps.length){
+      var mx=Math.max.apply(null,ps), mn=Math.min.apply(null,ps);
+      out+='疼 '+(mn===mx? painTxt(mx) : (painTxt(mn)+'～'+painTxt(mx)));
+    }
+    if(fs.length){
+      var fx=Math.max.apply(null,fs), fn=Math.min.apply(null,fs);
+      out+=' · 量 '+(fn===fx? flowTxt(fx) : (flowTxt(fn)+'～'+flowTxt(fx)));
+    }
+    return out;
+  }
+  function collect(recs){
+    var allP=[], allF=[], tot=0, segs=[], done=0, dtl=[];
+    recs.forEach(function(x){
+      if(!x.end) return;
+      done++;
+      var a=dn(x.start), b=dn(x.end);
+      if(b<a) b=a;
+      tot+=b-a+1;
+      segs.push(mdOf(a)+'～'+mdOf(b));
+      dtl.push((b-a+1)+'天');
+      if(x.days){
+        for(var k in x.days){
+          if(!x.days.hasOwnProperty(k)) continue;
+          var r=x.days[k]; if(!r) continue;
+          allP.push(r.p); if(r.f>0) allF.push(r.f);
+        }
+      }
+    });
+    return {p:allP,f:allF,tot:tot,segs:segs,n:done,detail:dtl};
+  }
+
+  var state={};
+  function parseQ(q){
+    var t=String(q||'').replace(/[^0-9\-]/g,'');
+    if(!t) return {y:null,m:null};
+    var p=t.split('-').filter(function(x){ return x!==''; });
+    if(p.length>=2) return {y:+p[0],m:+p[1]};
+    if(t.length>=4) return {y:+t.slice(0,4),m:null};
+    return {y:null,m:+t};
+  }
+  function build(){
+    var box=document.getElementById('years');
+    if(!box) return;
+    var q=document.getElementById('q');
+    var f=parseQ(q? q.value : '');
+    var now=new Date();
+    var curYM=now.getFullYear()+'-'+pad(now.getMonth()+1);
+
+    /* 从最早记录那个月，一直排到上个月；中间没记录的月份就是一个“没来” */
+    var all=perList().filter(function(r){ return String(r.start).slice(0,7) < curYM; });
+    if(!all.length){ box.innerHTML='<div class="empty">还没有可以看的月份</div>'; return; }
+    var first=String(all[0].start).slice(0,7);
+    var y0=+first.slice(0,4), m0=+first.slice(5,7);
+    var endY=now.getFullYear(), endM=now.getMonth()+1;
+    var mks=[];
+    while(y0<endY || (y0===endY && m0<endM)){
+      mks.push(y0+'-'+pad(m0));
+      m0++; if(m0>12){ m0=1; y0++; }
+    }
+    mks=mks.filter(function(mk){
+      if(f.y!==null && +mk.slice(0,4)!==f.y) return false;
+      if(f.m!==null && +mk.slice(5,7)!==f.m) return false;
+      return true;
+    }).sort().reverse();
+
+    var groups={}, order=[];
+    mks.forEach(function(mk){
+      var y=mk.slice(0,4);
+      if(!groups[y]){ groups[y]=[]; order.push(y); }
+      groups[y].push(mk);
+    });
+
+    var h='';
+    order.forEach(function(y){
+      var open;
+      if(state[y]) open=(state[y]==='open');
+      else if(f.y!==null||f.m!==null) open=true;
+      else open=(+y===now.getFullYear());
+      h+='<div class="ygrp'+(open?'':' fold')+'" data-y="'+y+'">';
+      h+='<div class="yb" data-y="'+y+'"><i></i><span>'+y+' 年 · '+groups[y].length+' 个月</span><i></i><em>\u203a</em></div>';
+      groups[y].forEach(function(mk){
+        var recs=monthRecs(mk);
+        var st=collect(recs);
+        var live=recs.filter(function(x){ return !x.end; });
+        var head='<div class="mt">'+(+mk.slice(5,7))+' 月</div>';
+        var dk=Object.keys(dayList(mk)).sort();
+        if(!dk.length){
+          h+='<div class="mc skip" data-mk="'+mk+'">'+head
+            +'<div class="np">· 没 来</div>'
+            +'<div class="ms">这个月一条记录都没有</div></div>';
+          return;
+        }
+        if(!st.n && !live.length){
+          h+='<div class="mc" data-mk="'+mk+'">'+head
+            +'<div class="ml">延续上次 · '+dk.length+' 天</div>'
+            +'<div class="ms">'+mdOf(dn(dk[0]))+'～'+mdOf(dn(dk[dk.length-1]))+'</div></div>';
+          return;
+        }
+        var lines='';
+        if(st.n){
+          lines+='<div class="ml">来了 '+st.n+' 次 · 共 '+st.tot+' 天</div>';
+          var segTxt=st.segs.map(function(sg,i){
+            return sg+(st.n>1? ('（'+st.detail[i]+'）') : '');
+          }).join(' / ');
+          lines+='<div class="ms">'+segTxt+'</div>';
+          var sl=statLine(st.p,st.f);
+          if(sl) lines+='<div class="mp">'+sl+'</div>';
+        }
+        if(live.length){
+          var lv=live[live.length-1];
+          if(!st.n) lines+='<div class="ml">来了 1 次</div>';
+          lines+='<div class="mp">'+(st.n?'还有一次 ':'')+mdOf(dn(lv.start))+' 来的 · 还没结束</div>';
+        }
+        var own={};
+        recs.forEach(function(x){
+          var a=dn(x.start), b=x.end? dn(x.end) : recOpenEnd(x);
+          for(var t=a;t<=b;t++){ var kk=kOf(t); if(kk.slice(0,7)===mk) own[kk]=1; }
+        });
+        var tail=dk.filter(function(k){ return !own[k]; });
+        if(tail.length) lines+='<div class="ms">另有 '+tail.length+' 天是上个月的延续</div>';
+        var note='';
+        recs.forEach(function(r){ if(r.note && r.note.replace(/\s/g,'')) note=r.note; });
+        lines+='<div class="mn">自述：'+(note||'无')+'</div>';
+        h+='<div class="mc'+(live.length?' live':'')+'" data-mk="'+mk+'">'+head+lines+'</div>';
+      });
+      h+='</div>';
+    });
+    box.innerHTML = h || '<div class="empty">还没有可以看的月份</div>';
+  }
+  function recOpenEnd(rec){
+    return todayN();
+  }
+  function monthTouch(mk){
+    var y=+mk.slice(0,4), m=+mk.slice(5,7);
+    var ms=Math.round(new Date(y,m-1,1).getTime()/86400000);
+    var me=Math.round(new Date(y,m,0).getTime()/86400000);
+    var tn=todayN();
+    return perList().filter(function(x){
+      var st=dn(x.start);
+      var en=x.end? dn(x.end) : recOpenEnd(x);
+      return st<=me && en>=ms;
+    });
+  }
+  function dayList(mk){
+    var recs=monthTouch(mk), map={};
+    var tn=todayN();
+    recs.forEach(function(r){
+      var a=dn(r.start);
+      var b=r.end? dn(r.end) : recOpenEnd(r);
+      if(b<a) b=a;
+      for(var t=a;t<=b;t++){
+        if(String(kOf(t)).slice(0,7)!==mk) continue;
+        var rr=(r.days&&r.days[kOf(t)])||null;
+        map[kOf(t)]=rr? {p:rr.p,f:rr.f,t:rr.t||'',nb:rr.nb||''} : null;
+      }
+    });
+    return map;
+  }
+  function dayRow(k,it){
+    var t=dn(k);
+    var lab=mdOf(t)+' 星期'+WD[new Date(t*86400000).getDay()];
+    var hasNb=!!(it&&it.nb);
+    var nbTxt=hasNb? it.nb : '无';
+    return '<div class="drow" data-day="'+k+'"><b>'+lab+'</b><div class="dr">'
+      +(it? ('<span>'+painTxt(it.p)+' · 量'+flowTxt(it.f)+(it.t? (' · '+it.t):'')+'</span>')
+          : '<span class="no">没有</span>')
+      +'</div>'
+      +'<div class="nbrow'+(hasNb?'':' empty')+'">'+nbTxt+'</div></div>';
+  }
+  function openDay(mk){
+    var map=dayList(mk);
+    var keys=Object.keys(map).sort();
+    var recs=monthRecs(mk);
+    var ttl=document.getElementById('dTtl');
+    var list=document.getElementById('dList');
+    if(ttl) ttl.textContent=(+mk.slice(0,4))+' 年 '+(+mk.slice(5,7))+' 月 的 每 天';
+    if(list){
+      if(!keys.length){ list.innerHTML='<div class="drow"><b>这个月没来 · 一条记录都没有</b></div>'; }
+      else{
+        var withData=[], missed=[];
+        keys.forEach(function(k){ if(map[k]) withData.push(k); else missed.push(k); });
+        var h='';
+        withData.forEach(function(k){ h+=dayRow(k,map[k]); });
+        if(missed.length && recs.length>1){
+          h+='<div class="dfold" data-fold="1">中间 '+missed.length+' 天没记 · 点开看</div>';
+          h+='<div class="dsub" id="dsub">';
+          missed.forEach(function(k){ h+=dayRow(k,map[k]); });
+          h+='</div>';
+        }else{
+          missed.forEach(function(k){ h+=dayRow(k,map[k]); });
+        }
+        list.innerHTML=h;
+      }
+    }
+    var m=document.getElementById('dmask');
+    if(m) m.classList.add('on');
+  }
+  var years=document.getElementById('years');
+  if(years) years.addEventListener('click',function(e){
+    var t=e.target;
+    while(t&&t!==years&&!t.getAttribute('data-mk')&&!t.getAttribute('data-y')) t=t.parentNode;
+    if(!t||t===years) return;
+    var mk=t.getAttribute('data-mk');
+    if(mk){ openDay(mk); return; }
+    var y=t.getAttribute('data-y');
+    var el=t.parentNode;
+    if(!el||el.className.indexOf('ygrp')<0) return;
+    var isFold=el.className.indexOf('fold')>=0;
+    el.className='ygrp'+(isFold?'':' fold');
+    state[y]=isFold?'open':'fold';
+  });
+
+  var qi=document.getElementById('q');
+  if(qi){
+    qi.addEventListener('input',build);
+    qi.addEventListener('keydown',function(e){ if(e.key==='Enter'){ qi.blur(); build(); } });
+  }
+  var qg=document.getElementById('qGo');
+  if(qg) qg.addEventListener('click',function(){ build(); });
+
+  var dlist=document.getElementById('dList');
+  if(dlist) dlist.addEventListener('click',function(e){
+    var f=e.target;
+    while(f&&f!==dlist&&!f.getAttribute('data-fold')) f=f.parentNode;
+    if(f&&f!==dlist){
+      var sb=document.getElementById('dsub');
+      if(sb) sb.className=(sb.className.indexOf('on')>=0)? 'dsub':'dsub on';
+      return;
+    }
+    var t=e.target;
+    while(t&&t!==dlist&&!t.getAttribute('data-day')) t=t.parentNode;
+    if(!t||t===dlist) return;
+    if(t.className.indexOf('open')>=0) t.className='drow';
+    else t.className='drow open';
+  });
+  var dc=document.getElementById('dClose');
+  var dm=document.getElementById('dmask');
+  if(dc) dc.addEventListener('click',function(){ if(dm) dm.classList.remove('on'); });
+  if(dm) dm.addEventListener('click',function(e){ if(e.target===dm) dm.classList.remove('on'); });
+
+  build();
+})();
+</script>
+<script>
+
+
+</script>
+</body>
+</html>

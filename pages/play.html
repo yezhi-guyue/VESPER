@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>命运轮盘</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{min-height:100%}
+  body{
+    background:linear-gradient(180deg,#fdfdfd 0%,#f7f7f7 55%,#f1f1f1 100%);
+    background-attachment:fixed;
+    color:#1b1a18;font-weight:200;
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans CJK SC",sans-serif;
+    padding:4.4vh 3.4vw 5vh;position:relative;overflow-x:hidden;
+    touch-action:pan-y;-webkit-text-size-adjust:100%
+  }
+  body::before{
+    content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+    background-image:
+      repeating-linear-gradient(0deg,rgba(0,0,0,.028) 0 1px,transparent 1px 48px),
+      repeating-linear-gradient(90deg,rgba(0,0,0,.028) 0 1px,transparent 1px 48px);
+  }
+  .back{
+    position:fixed;left:12px;top:14px;z-index:400;width:40px;height:40px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(255,255,255,.9);text-decoration:none;
+    box-shadow:0 1px 4px rgba(0,0,0,.08);-webkit-tap-highlight-color:transparent
+  }
+  .back img{width:17px;height:auto;display:block;opacity:.85}
+  .head{position:relative;z-index:2;text-align:center;margin-bottom:.5rem}
+  .head .t{font-size:19px;letter-spacing:.2em;text-indent:.2em;color:#3c3c3c;font-weight:200}
+  .head .s{margin-top:.42rem;font-size:8px;letter-spacing:.34em;text-indent:.34em;color:#b3b3b3;transition:opacity .22s ease}
+
+  .card{
+    position:relative;z-index:2;
+    background:rgba(255,255,255,.82);
+    border:1px solid rgba(0,0,0,.07);
+    border-radius:26px;
+    box-shadow:0 4px 18px rgba(0,0,0,.045);
+    padding:.35rem .5rem 1rem;
+    max-width:none;margin:0 auto
+  }
+
+  /* 选项组 */
+  .sets{position:relative;z-index:9;display:flex;justify-content:center;gap:.45rem;flex-wrap:wrap;margin-bottom:1.75rem}
+  .sets span{
+    font-size:9.5px;letter-spacing:.12em;color:#9d9d9d;
+    padding:.5rem .95rem;border-radius:999px;
+    border:1px solid rgba(0,0,0,.07);background:rgba(255,255,255,.6);
+    transition:all .22s ease
+  }
+  .sets span.on{color:#37506b;border-color:rgba(90,120,160,.24);background:#edf2f8;
+    box-shadow:0 1px 4px rgba(0,0,0,.06)}
+  .sets span{display:inline-flex;align-items:center;gap:.3em}
+  .sets span em{font-style:normal}
+  .sets span i{font-style:normal;font-size:11px;line-height:1;color:#c3c0bb;padding:0 .1em}
+  .sets span.mine{border-style:dashed;border-color:rgba(0,0,0,.16)}
+  .sets span i.arm{color:#bf6a6a;font-size:9px;letter-spacing:.04em}
+  .sets span.add{color:#8f8f8f;padding:.5rem .8rem;letter-spacing:0}
+  .cfgBox textarea{
+    width:100%;margin-top:.7rem;height:150px;border-radius:10px;resize:none;
+    border:1px solid rgba(0,0,0,.1);background:#fafafa;
+    padding:.6rem .7rem;font-size:11px;line-height:1.95;color:#333;outline:none;
+    font-family:inherit;letter-spacing:.02em
+  }
+  .cfgBox textarea::placeholder{color:#c2c2c2;font-size:10px}
+
+  /* 盘 */
+  .wbox{
+    position:relative;width:78vw;max-width:78vw;margin:0 auto;aspect-ratio:1/1;
+    touch-action:none;
+    display:flex;align-items:center;justify-content:center;
+    transition:transform .35s cubic-bezier(.22,1,.36,1)
+  }
+  /* 转动时只让画布转，整块不缩，猫和挂饰不受影响 */
+  .pdecos{
+    position:relative;z-index:2;display:flex;align-items:flex-end;
+    justify-content:space-between;padding:0 4vw;margin:.5rem 0 0
+  }
+  .pdeco{
+    height:auto;width:auto;opacity:.95;
+    user-select:none;-webkit-user-drag:none
+  }
+  .wdeco{
+    position:absolute;height:auto;transform:translate(-50%,-50%);
+    pointer-events:none;z-index:3;user-select:none;-webkit-user-drag:none
+  }
+  .wcenter{
+    position:absolute;left:50%;top:49.31%;width:12.42%;height:auto;
+    transform:translate(-50%,-50%);
+    pointer-events:none;z-index:4;user-select:none;-webkit-user-drag:none
+  }
+  .wneedle{
+    position:absolute;left:50%;top:37.6%;width:1.9%;height:6.2%;
+    transform:translateX(-50%);
+    background:#1b1b1b;z-index:5;pointer-events:none;
+    clip-path:polygon(50% 0,100% 100%,0 100%)
+  }
+  .wbox canvas{
+    position:relative;z-index:1;
+    width:100%;height:100%;display:block;
+    transition:transform 5s cubic-bezier(.12,.72,.1,1)
+  }
+  .wpin{display:none}
+  .wcore{
+    position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    width:17%;aspect-ratio:1/1;border-radius:50%;z-index:5;
+    background:transparent;border:0;box-shadow:none;
+    display:flex;align-items:center;justify-content:center;
+    color:transparent;font-size:0;
+    -webkit-tap-highlight-color:transparent
+  }
+  .wcore:active{transform:translate(-50%,-50%) scale(.96)}
+
+  /* 结果 */
+  .wres{
+    margin:.95rem auto 0;max-width:320px;text-align:center;
+    padding-top:.8rem;border-top:1px dashed rgba(0,0,0,.08)
+  }
+  .wres .big{
+    display:block;font-size:20px;letter-spacing:.18em;color:#242424;
+    opacity:.55;transition:opacity .3s ease,transform .3s cubic-bezier(.22,1,.36,1)
+  }
+  .wres.hit .big{opacity:1;transform:scale(1.04)}
+  .wres .sm{display:block;margin-top:.55rem;font-size:8.5px;letter-spacing:.18em;color:#b0a79b}
+
+  .btn{
+    display:block;margin:.85rem auto 0;
+    font-size:10.5px;letter-spacing:.38em;text-indent:.38em;color:#565b61;
+    width:78%;max-width:290px;padding:.78rem 1.8rem;border-radius:999px;background:#f2f3f4;
+    border:1px solid rgba(0,0,0,.05);
+    box-shadow:0 2px 8px rgba(0,0,0,.05);
+    transition:transform .12s ease,opacity .2s ease
+  }
+  .btn:active{transform:scale(.982)}
+  .btn.busy{opacity:.5}
+
+  .acts{display:flex;justify-content:center;gap:.5rem;margin-top:.85rem}
+  .acts .btn{margin:0}
+  .btn.ghost{background:rgba(255,255,255,.6);color:#8a8a8a;border-color:rgba(0,0,0,.08);box-shadow:none}
+  .toast{
+    position:fixed;left:50%;bottom:11vh;transform:translate(-50%,10px);
+    background:rgba(40,40,40,.86);color:#fff;font-size:9.5px;letter-spacing:.16em;
+    padding:.55rem 1.05rem;border-radius:999px;opacity:0;pointer-events:none;
+    transition:opacity .25s ease,transform .25s ease;z-index:600
+  }
+  .toast.on{opacity:1;transform:translate(-50%,0)}
+
+  /* 送出去的那张卡 */
+  .shareCard{
+    margin:0 auto;max-width:300px;text-align:center;
+    border:1px solid rgba(0,0,0,.1);border-radius:16px;background:#fff;
+    padding:1rem .9rem
+  }
+  .cfg{
+    position:fixed;right:12px;top:14px;z-index:400;width:32px;height:32px;border-radius:999px;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(255,255,255,.9);color:#666;font-size:13px;
+    box-shadow:0 1px 4px rgba(0,0,0,.08);text-decoration:none
+  }
+  .cfgMask{
+    position:fixed;inset:0;z-index:500;display:none;align-items:center;justify-content:center;
+    background:rgba(40,40,40,.3);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)
+  }
+  .cfgMask.on{display:flex}
+  .cfgBox{
+    width:84%;max-width:330px;background:#fff;border-radius:18px;
+    padding:1.15rem 1.05rem .8rem;box-shadow:0 10px 30px rgba(0,0,0,.12)
+  }
+  .cfgT{font-size:11px;letter-spacing:.26em;text-indent:.26em;color:#3c3c3c;text-align:center}
+  .cfgS{margin-top:.5rem;font-size:8px;line-height:1.9;letter-spacing:.08em;color:#a3a3a3;text-align:center}
+  .cfgBox input{
+    width:100%;margin-top:.95rem;height:38px;border-radius:10px;
+    border:1px solid rgba(0,0,0,.1);background:#fafafa;
+    padding:0 .7rem;font-size:11px;color:#333;outline:none;
+    font-family:inherit;letter-spacing:.04em
+  }
+  .cfgBox input::placeholder{color:#c2c2c2;font-size:10px}
+  .swRow{display:flex;align-items:center;justify-content:space-between;
+    margin-top:1rem;padding-top:.9rem;border-top:1px solid rgba(0,0,0,.06);
+    font-size:10px;letter-spacing:.14em;color:#6f6f6f}
+  .sw{position:relative;width:40px;height:23px;border-radius:999px;background:rgba(0,0,0,.13);
+    transition:background .2s ease;flex:none}
+  .sw::after{content:'';position:absolute;top:2.5px;left:2.5px;width:18px;height:18px;border-radius:50%;
+    background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.18);transition:left .2s ease}
+  .sw.on{background:#6f808d}
+  .sw.on::after{left:19.5px}
+  .cfgFoot{display:flex;justify-content:space-between;margin-top:.85rem;font-size:9px;letter-spacing:.2em;color:#8a8a8a}
+  .cfgFoot b{font-weight:200;padding:.45rem .3rem}
+  .foot{position:relative;z-index:2;text-align:center;font-size:8px;letter-spacing:.3em;color:#c4c4c4;margin-top:1.2rem}
+  .meow{
+    position:fixed;transform:translate(-50%,-100%);
+    font-size:12.5px;letter-spacing:.12em;color:#7c848c;
+    pointer-events:none;z-index:60;
+    animation:meowUp 1.05s cubic-bezier(.2,.8,.3,1) forwards
+  }
+  @keyframes meowUp{
+    0%{opacity:0;transform:translate(-50%,-100%) scale(.9)}
+    20%{opacity:1}
+    100%{opacity:0;transform:translate(-50%,-152%) scale(1.02)}
+  }
+  .wdeco.hop{animation:hop .42s ease}
+  @keyframes hop{
+    0%,100%{transform:translate(-50%,-50%)}
+    45%{transform:translate(-50%,-64%)}
+  }
+</style>
+</head>
+<body>
+
+<a class="back" href="inner.html" id="backA" aria-label="收起"><img src="assets/deco/deco_paw.png" alt=""></a>
+<a class="cfg" id="cfgBtn">⚙</a>
+
+<div class="head">
+  <div class="t">命 运 轮 盘</div>
+  <div class="s" id="wheelSub">转 到 哪 个 就 认</div>
+</div>
+
+<div class="card">
+  <div class="sets" id="sets"></div>
+
+  <div class="wbox" id="wbox">
+    <canvas id="cv" width="700" height="700"></canvas>
+    <img class="wdeco" id="catDeco" src="assets/deco/deco_cat.png" alt="" style="left:50%;top:9.5%;width:10.5%;pointer-events:auto;cursor:pointer">
+    <img class="wcenter" src="assets/deco/deco_center.png" alt="">
+    <!-- 指针画在中心图里，这里留空 -->
+    <div class="wcore" id="core"></div>
+  </div>
+
+  <div class="wres" id="res">
+    <span class="big">还 没 转</span>
+    <span class="sm">十 二 格 里 挑 一 个</span>
+  </div>
+
+  <div class="acts">
+    <b class="btn" id="go">转 动 命 运</b>
+    <b class="btn ghost" id="send">发 给 他</b>
+  </div>
+</div>
+
+<div class="toast" id="toast">已 复 制　粘 给 他 就 行</div>
+
+<div class="cfgMask" id="cfgMask">
+  <div class="cfgBox">
+    <div class="cfgT">发 给 谁</div>
+    <div class="cfgS">填对话 ID 就发到那个对话；<br>留空就发给最近聊天的那一个</div>
+    <input id="cfgIn" placeholder="对话 ID（可留空）">
+    <div class="cfgFoot"><b id="cfgNo">算 了</b><b id="cfgOk">好 了</b></div>
+  </div>
+</div>
+
+<div class="cfgMask" id="edMask">
+  <div class="cfgBox">
+    <div class="cfgT">新 的 盘</div>
+    <div class="cfgS">一行写一格，最多二十格</div>
+    <input id="edName" placeholder="给它取个名字">
+    <textarea id="edList" placeholder="火锅&#10;烧烤&#10;面"></textarea>
+    <div class="cfgFoot"><b id="edNo">算 了</b><b id="edOk">好 了</b></div>
+  </div>
+</div>
+
+
+<div class="pdecos">
+  <img class="pdeco" src="assets/deco/deco_x.png" alt="" style="width:8.9%;margin-bottom:1.4%">
+  <img class="pdeco" src="assets/deco/deco_o.png" alt="" style="width:5.8%;margin-bottom:2.6%">
+  <img class="pdeco" src="assets/deco/deco_fish.png" alt="" style="width:9.5%;margin-bottom:1%">
+</div>
+<div class="foot">夜 凪 摆 的 小 摊</div>
+
+<script>
+(function(){
+  var SETS={
+    '吃 什 么':['火锅','烧烤','面','家里做','外卖','随便','麻辣烫','饺子','粥','日料','炸鸡','不吃'],
+    '干 什 么':['抱十秒','说说今天','讲个笑话','夸我一句','亲一下','讲个秘密','你在想啥','随便扯',
+               '逗我笑','唱一句','看电影','出去走走','拍张照','躺一会儿','给我揉揉','猜拳',
+               '明天听我的','念一句诗']
+  };
+  var COLORS=['#ffffff','#f4f4f5']
+  function fontFor(n){ return n<=6? 30 : (n<=8? 28 : (n<=10? 25 : (n<=12? 23 : (n<=16? 20 : 18)))); }
+  var INK='#5f584e';
+  function luma(c){
+    var r=parseInt(c.substr(1,2),16), g=parseInt(c.substr(3,2),16), b=parseInt(c.substr(5,2),16);
+    return (r*299+g*587+b*114)/1000;
+  }
+  function inkOf(c){ return '#4b5058'; }
+  var CKEY='hearth_wheel_custom';
+  var CUSTOM=[];
+  try{ CUSTOM=JSON.parse(localStorage.getItem(CKEY)||'[]')||[]; }catch(e){ CUSTOM=[]; }
+  if(!CUSTOM.push) CUSTOM=[];
+  function saveCustom(){ try{ localStorage.setItem(CKEY,JSON.stringify(CUSTOM)); }catch(e){} }
+  function itemsOf(nm){
+    if(SETS[nm]) return SETS[nm];
+    for(var i=0;i<CUSTOM.length;i++) if(CUSTOM[i] && CUSTOM[i].name===nm) return CUSTOM[i].items;
+    return SETS['吃 什 么'];
+  }
+  function allNames(){
+    var a=[]; for(var n in SETS) a.push(n);
+    for(var i=0;i<CUSTOM.length;i++) a.push(CUSTOM[i].name);
+    return a;
+  }
+  var cur=allNames()[0];
+
+  var cv=document.getElementById('cv');
+  var ctx=cv.getContext('2d');
+  var wbox=document.getElementById('wbox');
+  var core=document.getElementById('core');
+  var go=document.getElementById('go');
+  var res=document.getElementById('res');
+  var resBig=res.querySelector('.big');
+  var resSm=res.querySelector('.sm');
+  var setsEl=document.getElementById('sets');
+  var deg=0, busy=false, lastPick=null, lastGroup=null;
+
+  function items(){ return itemsOf(cur); }
+
+  function resetRes(){
+    res.classList.remove('hit');
+    lastPick=null; lastGroup=null;
+    resBig.textContent='还 没 转';
+    resSm.textContent=items().length+' 格 里 挑 一 个';
+  }
+
+  function renderSets(){
+    setsEl.innerHTML='';
+    var list=allNames();
+    list.forEach(function(nm){
+      var isMine=!SETS[nm];
+      var sp=document.createElement('span');
+      sp.className=(nm===cur? 'on ':'')+(isMine? 'mine':'');
+      var tx=document.createElement('em');
+      tx.textContent=nm;
+      sp.appendChild(tx);
+      if(isMine){
+        var x=document.createElement('i');
+        x.textContent='×';
+        x.addEventListener('click',function(ev){
+          ev.stopPropagation();
+          if(busy) return;
+          if(x.getAttribute('data-arm')!=='1'){
+            x.setAttribute('data-arm','1');
+            x.textContent='删';
+            x.className='arm';
+            setTimeout(function(){
+              if(x){ x.setAttribute('data-arm',''); x.textContent='×'; x.className=''; }
+            },2000);
+            return;
+          }
+          var i2=-1;
+          for(var k=0;k<CUSTOM.length;k++) if(CUSTOM[k].name===nm) i2=k;
+          if(i2<0) return;
+          CUSTOM.splice(i2,1);
+          saveCustom();
+          if(cur===nm) cur=allNames()[0];
+          renderSets(); draw(); resetRes();
+          say('删 了');
+        });
+        sp.appendChild(x);
+      }
+      sp.addEventListener('click',function(){
+        if(busy) return;
+        cur=nm;
+        renderSets(); draw(); resetRes();
+      });
+      setsEl.appendChild(sp);
+    });
+
+    var add=document.createElement('span');
+    add.className='add';
+    add.textContent='＋';
+    add.addEventListener('click',function(){ if(busy) return; openEditor(); });
+    setsEl.appendChild(add);
+  }
+
+  /* ---- 自定义盘 ---- */
+  var edMask=document.getElementById('edMask');
+  var edName=document.getElementById('edName');
+  var edList=document.getElementById('edList');
+  function openEditor(){
+    edName.value='';
+    edList.value='';
+    edMask.classList.add('on');
+  }
+  function closeEditor(){ edMask.classList.remove('on'); }
+  document.getElementById('edNo').addEventListener('click',closeEditor);
+  edMask.addEventListener('click',function(e){ if(e.target===edMask) closeEditor(); });
+  document.getElementById('edOk').addEventListener('click',function(){
+    var nm=(edName.value||'').replace(/^\s+|\s+$/g,'');
+    var NL=String.fromCharCode(10);
+    var raw=(edList.value||'').split(NL);
+    var arr=[];
+    for(var i=0;i<raw.length;i++){
+      var t=raw[i].replace(/^\s+|\s+$/g,'');
+      if(t) arr.push(t);
+    }
+    if(!arr.length){ say('至 少 写 一 格'); return; }
+    if(arr.length>20) arr=arr.slice(0,20);
+    if(!nm) nm='我 的 盘';
+    var hit=-1;
+    for(var k=0;k<CUSTOM.length;k++) if(CUSTOM[k].name===nm) hit=k;
+    if(hit>=0) CUSTOM[hit].items=arr;
+    else CUSTOM.push({name:nm,items:arr});
+    saveCustom();
+    cur=nm;
+    closeEditor();
+    renderSets(); draw(); resetRes();
+    say('记 住 了');
+  });
+
+  renderSets();
+
+  function draw(){
+    var it=items(), n=it.length;
+    var W=cv.width, C=W/2;
+    var RO=C*0.776;   /* 圆环半径 */
+    var RI=C*0.045;   /* 内端，被中心圆盖住 */
+    ctx.clearRect(0,0,W,W);
+
+    var step=Math.PI*2/n;
+
+    /* 格子填色：白、浅灰、带蓝调的灰，三色转 */
+    for(var i=0;i<n;i++){
+      var a0=-Math.PI/2+i*step, a1=a0+step;
+      ctx.beginPath();
+      ctx.arc(C,C,RO,a0,a1);
+      ctx.arc(C,C,RI,a1,a0,true);
+      ctx.closePath();
+      ctx.fillStyle=COLORS[i%COLORS.length];
+      ctx.fill();
+    }
+
+    /* 圆环 */
+    ctx.beginPath(); ctx.arc(C,C,RO,0,Math.PI*2);
+    ctx.strokeStyle='rgba(176,183,191,.95)'; ctx.lineWidth=1.8; ctx.stroke();
+
+    /* 格线 */
+    ctx.strokeStyle='rgba(190,197,205,.95)';
+    ctx.lineWidth=1.4;
+    for(var i2=0;i2<n;i2++){
+      var a=-Math.PI/2+i2*step;
+      ctx.beginPath();
+      ctx.moveTo(C+Math.cos(a)*RI, C+Math.sin(a)*RI);
+      ctx.lineTo(C+Math.cos(a)*(RO+0.8), C+Math.sin(a)*(RO+0.8));
+      ctx.stroke();
+    }
+
+    /* 文字 */
+    for(var k=0;k<n;k++){
+      var am=-Math.PI/2+(k+0.5)*step;
+      ctx.save();
+      ctx.translate(C,C); ctx.rotate(am);
+      ctx.textAlign='right'; ctx.textBaseline='middle';
+      var bgc=COLORS[k%COLORS.length];
+      ctx.fillStyle = (luma(bgc)<128)? '#ffffff' : '#6a7178';
+      ctx.font='400 '+fontFor(n)+'px -apple-system,PingFang SC,sans-serif';
+      ctx.fillText(it[k], C*0.70, 0);
+      ctx.restore();
+    }
+  }
+
+  draw();
+
+  function spin(){
+    if(busy) return;
+    busy=true;
+    var n=items().length;
+    go.classList.add('busy');
+    wbox.classList.add('spin');
+    core.classList.add('spin');
+    res.classList.remove('hit');
+    resBig.textContent='·  ·  ·';
+    resSm.textContent=''; 
+
+    deg += 360*(5+Math.floor(Math.random()*3)) + Math.floor(Math.random()*360);
+    cv.style.transform='rotate('+deg+'deg)';
+
+    setTimeout(function(){
+      busy=false;
+      go.classList.remove('busy');
+      wbox.classList.remove('spin');
+      core.classList.remove('spin');
+      var stepDeg=360/n;
+      var rel=((-deg)%360+360)%360;
+      var rest=rel%stepDeg;
+      var near=(rest<stepDeg*0.045) || (rest>stepDeg*0.955);
+      var EDGE=['压 线 了 重 转','线 上 不 算 数','手 气 卡 在 缝 里',
+                '这 次 不 作 数','天 意 卡 住 了','盘 也 会 打 滑',
+                '差 一 点 点 就 中'];
+      if(near){
+        var e=EDGE[Math.floor(Math.random()*EDGE.length)];
+        resBig.textContent=e;
+        resSm.textContent='刚 好 压 在 分 割 线 上';
+      }else{
+        var idx=Math.floor(rel/stepDeg)%n;
+        resBig.textContent=items()[idx];
+        resSm.textContent=cur;
+        lastPick=items()[idx]; lastGroup=cur;
+        armWheelNote();
+      }
+      res.classList.add('hit');
+    },5100);
+  }
+
+  go.addEventListener('click',spin);
+  core.addEventListener('click',spin);
+
+  /* ---- 别人替我转：读指令文件 ---- */
+  var CMDURL='./wheel_cmd.json';
+  var lastSeq=0, firstPull=true;
+  function pullCmd(){
+    try{
+      var x=new XMLHttpRequest();
+      x.open('GET', CMDURL+'?t='+Date.now(), true);
+      x.onload=function(){
+        if(x.status!==200 && x.status!==0) return;
+        var o=null;
+        try{ o=JSON.parse(x.responseText); }catch(e){ return; }
+        if(!o || typeof o.spinSeq!=='number') return;
+        if(firstPull){ lastSeq=o.spinSeq; firstPull=false; return; }
+        if(o.spinSeq>lastSeq){ lastSeq=o.spinSeq; if(!busy) spin(); }
+      };
+      x.send();
+    }catch(e){}
+  }
+  pullCmd();
+  setInterval(pullCmd, 4000);
+
+
+  /* ---- 把结果送出去 ---- */
+  var toast=document.getElementById('toast');
+  var toastT=null;
+  function say(t){
+    if(!toast) return;
+    toast.textContent=t;
+    toast.classList.add('on');
+    if(toastT) clearTimeout(toastT);
+    toastT=setTimeout(function(){ toast.classList.remove('on'); },1900);
+  }
+  function copyText(t){
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(t).then(function(){ say('已 复 制　粘 给 他 就 行'); },
+        function(){ fallbackCopy(t); });
+      return;
+    }
+    fallbackCopy(t);
+  }
+  function fallbackCopy(t){
+    var ta=document.createElement('textarea');
+    ta.value=t;
+    ta.style.position='fixed'; ta.style.left='-999px'; ta.style.top='0';
+    document.body.appendChild(ta);
+    ta.focus(); ta.select();
+    var ok=false;
+    try{ ok=document.execCommand('copy'); }catch(e){ ok=false; }
+    document.body.removeChild(ta);
+    say(ok? '已 复 制　粘 给 他 就 行' : '复 制 不 了　截 个 图 给 他');
+  }
+
+  document.getElementById('send').addEventListener('click',function(){
+    if(!lastPick){ say('先 转 一 下'); return; }
+    sendOut(buildMsg());
+  });
+
+  /* 先试试家插件那条通道（hearthsend:），没接上就退回复制 */
+  var CFGKEY='hearth_wheel_chat';
+  function cfgId(){
+    try{ return (localStorage.getItem(CFGKEY)||'').trim(); }catch(e){ return ''; }
+  }
+  function buildMsg(){
+    var d=new Date();
+    return '转了命运轮盘：'+lastPick+'（'+lastGroup+'）· '+pad2(d.getHours())+':'+pad2(d.getMinutes());
+  }
+  /* 转完十五秒内没点「发给他」，就攒着，等她下次开口再告诉她 */
+  var noteTimer=null, noteSent=false;
+  function armWheelNote(){
+    noteSent=false;
+    if(noteTimer) clearTimeout(noteTimer);
+    noteTimer=setTimeout(function(){
+      if(noteSent || !lastPick) return;
+      var d=new Date();
+      var txt='她转了命运轮盘，停在「'+lastPick+'」（'+lastGroup+'）';
+      try{ location.href='hearthnote:?k=wheel&t='+encodeURIComponent(txt)+'&h='+d.getHours()+'&m='+d.getMinutes(); }catch(e){}
+    }, 4000);
+  }
+
+  function sendOut(t){
+    noteSent=true;
+    var sent=false;
+    var cid=cfgId();
+    var url='hearthsend:?t='+encodeURIComponent(t)+(cid? '&c='+encodeURIComponent(cid) : '');
+    try{
+      location.href=url;
+      sent=true;
+    }catch(e){ sent=false; }
+    if(sent){
+      say('发 出 去 了');
+    }else{
+      copyText(t);
+    }
+  }
+  /* ---- 发给谁 ---- */
+  var cfgMask=document.getElementById('cfgMask');
+  var cfgIn=document.getElementById('cfgIn');
+  var SWK='hearth_note_wheel';
+  function swOn(){ try{ return (localStorage.getItem(SWK)||'1')!=='0'; }catch(e){ return true; } }
+  function paintSw(){ var el=document.getElementById('swWheel'); if(el) el.classList.toggle('on', swOn()); }
+  var swEl=document.getElementById('swWheel');
+  if(swEl) swEl.addEventListener('click',function(){
+    var nv=swOn()? '0':'1';
+    try{ localStorage.setItem(SWK,nv); }catch(e){}
+    paintSw();
+  });
+
+  document.getElementById('cfgBtn').addEventListener('click',function(){
+    cfgIn.value=cfgId();
+    paintSw();
+    cfgMask.classList.add('on');
+  });
+  document.getElementById('cfgNo').addEventListener('click',function(){
+    cfgMask.classList.remove('on');
+  });
+  document.getElementById('cfgOk').addEventListener('click',function(){
+    var v=(cfgIn.value||'').trim();
+    try{
+      if(v) localStorage.setItem(CFGKEY,v);
+      else localStorage.removeItem(CFGKEY);
+    }catch(e){}
+    cfgMask.classList.remove('on');
+    say(v? '记 住 了' : '留 空 就 发 最 近 的');
+  });
+  cfgMask.addEventListener('click',function(e){ if(e.target===cfgMask) cfgMask.classList.remove('on'); });
+
+  function pad2(n){ return n<10? '0'+n : ''+n; }
+
+  /* 收起 */
+  var a=document.getElementById('backA');
+  function goBack(){
+    try{ if(window.self===window.top && window.history.length>1){ window.history.back(); return; } }catch(e0){}
+
+    if(window.self!==window.top){
+      var pd=null;
+      try{ pd=window.parent.document; }catch(err){ pd=null; }
+      if(pd){
+        var w=pd.querySelector('.pgwrap');
+        if(w){
+          var pg=w.querySelector('.pg');
+          if(pg) pg.classList.remove('on');
+          w.classList.remove('on');
+          setTimeout(function(){ if(w && w.parentNode) w.parentNode.removeChild(w); },800);
+          try{ window.parent.postMessage({t:'hearth:back'},'*'); }catch(e1){}
+          return;
+        }
+        if(pd.querySelector('.door')){
+          var dfr=pd.querySelector('.door iframe');
+          if(dfr){ try{ dfr.src='inner.html'; return; }catch(e2){} }
+          try{ window.parent.postMessage({t:'hearth:exit'},'*'); }catch(e3){}
+          return;
+        }
+      }else{
+        try{ window.parent.postMessage({t:'hearth:back'},'*'); return; }catch(e3){}
+      }
+      try{ window.top.location.href='inner.html'; return; }catch(e4){}
+    }
+    location.href='inner.html';
+  }
+  if(a) a.addEventListener('click',function(e){ e.preventDefault(); goBack(); });
+})();
+</script>
+
+<script>
+(function(){
+  var cd=document.getElementById('catDeco');
+  var box=document.getElementById('wbox');
+  if(!cd || !box) return;
+  var t=null;
+  cd.addEventListener('click',function(e){
+    e.preventDefault(); e.stopPropagation();
+    var r=cd.getBoundingClientRect(), br=box.getBoundingClientRect();
+    var sp=document.createElement('span');
+    sp.className='meow';
+    sp.textContent='喵';
+    sp.style.left=(r.left+r.width/2)+'px';
+    sp.style.top=(r.top+3)+'px';
+    box.appendChild(sp);
+    setTimeout(function(){ if(sp.parentNode) sp.parentNode.removeChild(sp); },1100);
+    cd.classList.remove('hop');
+    void cd.offsetWidth;
+    cd.classList.add('hop');
+    clearTimeout(t);
+    t=setTimeout(function(){ cd.classList.remove('hop'); },460);
+  });
+})();
+</script>
+
+<script>
+(function(){
+  var t=document.querySelector('.head .t');
+  var sub=document.getElementById('wheelSub');
+  if(!t || !sub) return;
+  var LINES=[
+    '转 归 转 你 说 了 算',
+    '盘 不 会 撒 谎 但 会 装 傻',
+    '这 次 真 的 不 作 弊',
+    '别 一 直 盯 着 它 看',
+    '再 转 一 次 也 是 它',
+    '选 好 了 就 不 许 赖',
+    '十 二 格 都 在 等 你'
+  ];
+  var last=0, idx=-1;
+  function rotate(){
+    var n;
+    do{ n=Math.floor(Math.random()*LINES.length); }while(n===idx && LINES.length>1);
+    idx=n;
+    sub.textContent=LINES[n];
+    sub.style.opacity='0';
+    setTimeout(function(){ sub.style.opacity=''; },40);
+  }
+  t.addEventListener('click',function(){
+    var now=Date.now();
+    if(now-last<420) rotate();
+    last=now;
+  });
+})();
+</script>
+</body>
+</html>

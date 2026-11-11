@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang=zh-CN>
+<head>
+<meta charset=UTF-8>
+<meta name=viewport content=width=device-width,initial-scale=1.0,viewport-fit=cover>
+<title>日记</title>
+<style>html,body{background:#fffdfb}</style>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%}
+  body{
+    background:linear-gradient(180deg,#fffdfb 0%,#fdf8f2 60%,#fbf5ee 100%);background-attachment:fixed;
+    font-family:-apple-system,BlinkMacSystemFont,PingFang SC,Noto Sans CJK SC,sans-serif;
+    color:#000;font-weight:300;
+    display:flex;flex-direction:column;overflow:hidden;
+  }
+  .bar{
+    flex:none;display:flex;align-items:center;justify-content:space-between;
+    padding:16px 16px 10px;
+  }
+  .bar a{font-size:12px;letter-spacing:.2em;color:#333;text-decoration:none;padding:6px 4px}
+  .barR{display:flex;align-items:center;gap:10px}
+  .picbtn{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    background:rgba(0,0,0,.05);color:#3a3a3a}
+  .picbtn:active{background:rgba(0,0,0,.1)}
+  .picbtn svg{width:18px;height:18px}
+  .done{
+    font-size:12px;letter-spacing:.2em;color:#fff;background:#2f2f2f;
+    padding:9px 18px;border-radius:999px;font-weight:400;display:none;
+    box-shadow:0 4px 14px rgba(0,0,0,.18);
+  }
+  .holder{flex:1;display:flex;padding:2px 12px 0;min-height:0}
+  .sheet{
+    flex:1;display:flex;flex-direction:column;min-height:0;
+    border-radius:18px 18px 6px 6px;
+    padding:20px 18px 14px;
+    box-shadow:0 1px 2px rgba(0,0,0,.05),0 18px 40px -26px rgba(0,0,0,.45);
+    position:relative;overflow:hidden;
+    background-image:repeating-linear-gradient(180deg,transparent 0 33px,rgba(0,0,0,.045) 33px 34px);
+    background-position:0 66px;
+  }
+  .sheet::before{
+    content:'';position:absolute;left:0;top:0;bottom:0;width:26px;
+    background:linear-gradient(90deg,rgba(0,0,0,.045),rgba(0,0,0,0));
+    pointer-events:none;
+  }
+  .dtag{
+    align-self:flex-start;
+    font-size:9.5px;letter-spacing:.14em;color:#333;
+    background:rgba(0,0,0,.05);padding:4px 10px;border-radius:999px;
+  }
+  .ttl{
+    width:100%;border:0;background:none;outline:none;
+    font:inherit;font-size:21px;color:#000;letter-spacing:.01em;
+    line-height:34px;padding:12px 0 0;
+  }
+  .ttl::placeholder{color:#9a9a9a}
+  .hr{flex:none;height:1px;background:rgba(0,0,0,.10);margin:10px 0 14px}
+  .sin{
+    flex:1;width:100%;border:0;background:none;outline:none;resize:none;
+    font:inherit;font-size:14px;line-height:34px;color:#000;
+    padding:0;
+  }
+  .sin::placeholder{color:#9a9a9a}
+  .pics{flex:none;display:flex;gap:9px;flex-wrap:wrap;margin-top:34px}
+  .pics:empty{display:none}
+  .pics .ph{position:relative;display:inline-flex;border-radius:11px;overflow:hidden;background:#f1f1f1}
+  .pics .ph img{height:104px;width:auto;display:block}
+  .pics .ph i{position:absolute;right:4px;top:4px;width:19px;height:19px;border-radius:50%;
+    background:rgba(0,0,0,.45);color:#fff;font-size:12px;font-style:normal;
+    display:flex;align-items:center;justify-content:center}
+  .pics .addx{width:104px;height:104px;border-radius:11px;border:1px dashed rgba(0,0,0,.18);
+    display:flex;align-items:center;justify-content:center;color:#b3b3b3;font-size:22px}
+  .sfoot{
+    flex:none;display:flex;align-items:center;justify-content:space-between;
+    margin-top:10px;padding-top:8px;border-top:1px solid rgba(0,0,0,.07);
+    font-size:9px;letter-spacing:.16em;color:#777;
+  }
+  .colors{
+    flex:none;display:flex;align-items:center;gap:10px;justify-content:center;
+    padding:14px 16px 24px;
+  }
+  .colors b{font-size:9px;letter-spacing:.2em;color:#777;font-weight:300;margin-right:2px}
+  .sw{width:26px;height:26px;border-radius:50%;border:2px solid rgba(255,255,255,.9);box-shadow:0 1px 5px rgba(0,0,0,.18)}
+  .sw.on{box-shadow:0 0 0 2px #555}
+
+  body{animation:vin .36s cubic-bezier(.22,1,.36,1) both}
+  @keyframes vin{from{opacity:.55;transform:translateX(16px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+
+<div class=bar>
+  <a href=diary.html id=back>‹ 收 起</a>
+  <span class=barR>
+    <b class=picbtn id=picBtn aria-label="加图片"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3.2" y="4.6" width="17.6" height="14.8" rx="2.6"/><circle cx="8.6" cy="9.6" r="1.5"/><path d="M4 17l4.8-4.6 3.4 3.2 3-2.6L20.4 17"/></svg></b>
+    <span class=done id=done>完 成</span>
+  </span>
+</div>
+
+<div class=holder>
+  <div class=sheet id=sheet>
+    <div class=dtag id=din data-d=></div>
+    <input class=ttl id=tin placeholder="标 题">
+    <div class=hr></div>
+    <textarea class=sin id=sin placeholder="今 天 怎 么 样　两 句 就 行"></textarea>
+    <div class="pics" id="pics"></div>
+    <input type=file id=picIn accept="image/*" style="display:none">
+    <div class=sfoot><span id=who></span><span id=tm></span></div>
+  </div>
+</div>
+
+<div class=colors id=colors><b>纸 色</b></div>
+
+<script src=s.js?v=7></script>
+<script>
+(function(){
+  var LKEY='hearth_days_log';
+  var PKEY='hearth_diary_paper';
+  var q=new URLSearchParams(location.search);
+  var id=q.get('id')||'new';
+
+  var din=document.getElementById('din');
+  var tin=document.getElementById('tin');
+  var sin=document.getElementById('sin');
+  var tm=document.getElementById('tm');
+  var who=document.getElementById('who');
+  var sheet=document.getElementById('sheet');
+
+  function todayKey(){
+    var d=new Date();
+    return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2);
+  }
+  function hhmm(ts){
+    var d=new Date(ts||Date.now());
+    return ('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);
+  }
+
+  var item=null, isMine=false, isDemo=false;
+  var all=(S_.DAYS||[]).concat(S_.store(LKEY,[]));
+  for(var i=0;i<all.length;i++){ if(all[i].id===id) item=all[i]; }
+  if(item){ isMine = item.id && item.id.indexOf('u')===0; isDemo = !isMine; }
+  var patch=S_.store('hearth_diary_patch',{});
+  var shown = item || (patch[id]? {id:id,d:'',t:patch[id].t,s:patch[id].s} : null);
+
+  var dval=(shown&&shown.d)?shown.d:todayKey();
+  var p=dval.split('-');
+  var W=['日','一','二','三','四','五','六'];
+  var wd=W[new Date(+p[0],(+p[1])-1,+p[2]).getDay()];
+  din.setAttribute('data-d',dval);
+  din.textContent=(+p[0])+' 年 '+(+p[1])+' 月 '+(+p[2])+' 日 · 星期'+wd;
+
+  if(shown){ tin.value=shown.t||''; sin.value=shown.s||''; }
+
+  var ts=(shown&&shown.ts)?shown.ts:Date.now();
+  tm.textContent=hhmm(ts)+' 写';
+
+  /* 写好的只能看，不能改；颜色也按当时存的来 */
+  var readOnly = (id!=='new') && !!shown;
+  if(!readOnly){ var dnShow=document.getElementById('done'); if(dnShow) dnShow.style.display='inline-block'; }
+  if(readOnly){
+    tin.readOnly=true; sin.readOnly=true;
+    var dn=document.getElementById('done'); if(dn) dn.style.display='none';
+    var cs=document.getElementById('colors'); if(cs) cs.style.display='none';
+  }
+
+  var WHO=S_.store('hearth_diary_who',{});
+  who.textContent=(isDemo? (WHO.aiName||'夜 凪') : (WHO.meName||'悦 悦'))+' 写的';
+
+  var COLORS=['#ffffff','#faf7f2','#f2f2f2','#fdf0f2','#f8f2e6','#eef3f7','#eef4ee'];
+  var box=document.getElementById('colors');
+  var cur=S_.store(PKEY,'#ffffff');
+  if(COLORS.indexOf(cur)<0) cur='#ffffff';
+  if(readOnly && shown && shown.paper && COLORS.indexOf(shown.paper)>=0) cur=shown.paper;
+  function paint(c){
+    sheet.style.background= c+' repeating-linear-gradient(180deg,transparent 0 33px,rgba(0,0,0,.045) 33px 34px)';
+    sheet.style.backgroundPosition='0 0, 0 66px';
+    sheet.style.backgroundSize='auto, auto';
+    sheet.style.backgroundRepeat='no-repeat, repeat';
+    var sws=box.querySelectorAll('.sw');
+    for(var k=0;k<sws.length;k++) sws[k].classList.toggle('on', sws[k].getAttribute('data-c')===c);
+  }
+  COLORS.forEach(function(c){
+    var d=document.createElement('span');
+    d.className='sw';
+    d.setAttribute('data-c',c);
+    d.style.background=c;
+    d.addEventListener('click',function(){ if(readOnly) return; cur=c; S_.setStore(PKEY,c); paint(c); });
+    box.appendChild(d);
+  });
+  paint(cur);
+
+  /* ---- 日记里的图片 ---- */
+  var pics = (shown && shown.pics) ? shown.pics.slice(0) : [];
+  var picsBox=document.getElementById('pics');
+  var picIn=document.getElementById('picIn');
+  function renderPics(){
+    if(!picsBox) return;
+    picsBox.innerHTML='';
+    for(var i=0;i<pics.length;i++){
+      (function(i){
+        var d=document.createElement('div');
+        d.className='ph';
+        d.innerHTML='<img src="'+pics[i]+'">'+ (readOnly? '' : '<i>\u00d7</i>');
+        if(!readOnly){
+          d.querySelector('i').addEventListener('click',function(){
+            pics.splice(i,1); renderPics();
+          });
+        }
+        picsBox.appendChild(d);
+      })(i);
+    }
+  }
+  if(picIn){
+    picIn.addEventListener('change',function(){
+      var f=this.files && this.files[0];
+      if(!f) return;
+      this.value='';
+      var fr=new FileReader();
+      fr.onload=function(e){
+        var img=new Image();
+        img.onload=function(){
+          var max=900, w=img.width, h=img.height;
+          if(w>max||h>max){ var r=Math.min(max/w,max/h); w=Math.round(w*r); h=Math.round(h*r); }
+          var c=document.createElement('canvas'); c.width=w; c.height=h;
+          c.getContext('2d').drawImage(img,0,0,w,h);
+          pics.push(c.toDataURL('image/jpeg',0.8));
+          renderPics();
+        };
+        img.src=e.target.result;
+      };
+      fr.readAsDataURL(f);
+    });
+  }
+  renderPics();
+
+  var picBtn=document.getElementById('picBtn');
+  if(picBtn){
+    picBtn.addEventListener('click',function(){ if(!readOnly && picIn) picIn.click(); });
+    if(readOnly) picBtn.style.display='none';
+  }
+
+
+  function notifyAI(title, day){
+    try{ if((localStorage.getItem('hearth_note_diary')||'1')==='0') return; }catch(e){}
+    try{
+      var d=new Date();
+      var hh=('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);
+      var t='她在 '+day+' '+hh+' 写了日记《'+title+'》，要不要去看看';
+      location.href='hearthnote:?k=diary&t='+encodeURIComponent(t);
+    }catch(e){}
+  }
+
+  function save(){
+    var t=tin.value.trim();
+    var s=sin.value.trim();
+    var d=din.getAttribute('data-d')||todayKey();
+    if(!t && !s){ location.href='diary.html?t='+Date.now(); return; }
+    if(!t) t='(没有标题)';
+
+    if(isMine){
+      var mine=S_.store(LKEY,[]);
+      for(var i=0;i<mine.length;i++){
+        if(mine[i].id===id){ mine[i].t=t; mine[i].s=s; mine[i].d=d; if(!mine[i].ts) mine[i].ts=ts; mine[i].pics=pics.slice(0); }
+      }
+      S_.setStore(LKEY,mine);
+    } else if(isDemo){
+      var P=S_.store('hearth_diary_patch',{});
+      P[id]={t:t,s:s};
+      S_.setStore('hearth_diary_patch',P);
+    } else {
+      var list=S_.store(LKEY,[]);
+      list.push({id:'u'+Date.now(),d:d,t:t,s:s,ts:Date.now(),paper:cur,pics:pics.slice(0)});
+      S_.setStore(LKEY,list);
+      notifyAI(t,d);
+    }
+    setTimeout(function(){ location.href='diary.html?t='+Date.now(); }, 170);
+  }
+
+  document.getElementById('done').addEventListener('click',save);
+  document.getElementById('back').addEventListener('click',function(e){
+    e.preventDefault();
+    location.href='diary.html?t='+Date.now();
+  });
+})();
+</script>
+</body>
+</html>
