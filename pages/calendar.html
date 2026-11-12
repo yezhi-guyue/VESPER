@@ -2,6 +2,8 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
+<script src="ls.js"></script>
+<script src="bridge.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>日历</title>
 <style>
@@ -446,7 +448,7 @@
 <div class="topbar">
   <a class="backbig" href="inner.html" aria-label="回去" ><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4.5L7.5 12l7.5 7.5"/></svg></a>
   <div class="rgrp">
-  <a class="rbtn" id="moodBtn" href="mood.html" aria-label="心情"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="8.4"/><path d="M9.2 10.3h.02M14.8 10.3h.02" stroke-width="2"/><path d="M8.9 14.2c.8 1.2 1.8 1.8 3.1 1.8s2.3-.6 3.1-1.8"/></svg></a>
+  <a class="rbtn" id="moodBtn" href="mood.html?v=2" aria-label="心情"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="8.4"/><path d="M9.2 10.3h.02M14.8 10.3h.02" stroke-width="2"/><path d="M8.9 14.2c.8 1.2 1.8 1.8 3.1 1.8s2.3-.6 3.1-1.8"/></svg></a>
   <a class="rbtn" id="perBtnTop" href="period.html" aria-label="月记"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.4"/><path d="M12 7.6c1.9 2.1 3 3.6 3 5.1a3 3 0 1 1-6 0c0-1.5 1.1-3 3-5.1z"/></svg></a>
   <a class="rbtn" id="cdnBtn" href="countdown.html" aria-label="倒数日"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.6"/><path d="M3.5 9.6h17M8 3.2v3.2M16 3.2v3.2"/></svg></a>
   <a class="rbtn" id="setBtn" href="javascript:;" aria-label="设置"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.6 1.6 0 0 0-1.8-.3 1.6 1.6 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1A1.6 1.6 0 0 0 9 19.4a1.6 1.6 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.6 1.6 0 0 0 .3-1.8 1.6 1.6 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1A1.6 1.6 0 0 0 4.6 9a1.6 1.6 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.6 1.6 0 0 0 1.8.3H9a1.6 1.6 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.5 1.6 1.6 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.6 1.6 0 0 0-.3 1.8V9a1.6 1.6 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.5 1z"/></svg></a>
