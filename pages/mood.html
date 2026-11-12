@@ -2,6 +2,8 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
+<script src="ls.js"></script>
+<script src="bridge.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>心情</title>
 <style>
@@ -266,20 +268,21 @@
 
   /* 我自己的心情：夜凪填。改这里就是我自己在选 */
   var AI_MOOD={
-    '2026-11-10':'mood_love'
+    '2026-11-10':'mood_love',
+    '2026-11-12':'mood_happy'
   };
   (function(){
     var ch=false;
     for(var d in AI_MOOD){
       var v=MD[d];
       var o=(v&&typeof v==='object')? v : {me:(typeof v==='string'? v:''), ai:''};
-      if(o.ai!==AI_MOOD[d]){
+      if(!o.ai){
         o.ai=AI_MOOD[d];
         MD[d]={me:o.me||'', ai:o.ai};
         ch=true;
       }
     }
-    if(ch) save();
+    if(ch){ save(); try{ if(window.__LS_FLUSH) window.__LS_FLUSH(); }catch(e){} }
   })();
 
   /* 序号：1张嘴笑 2眨眼爱心 3圆眼 4闭眼 5叹气 6蝴蝶结 7眼泪 8火气 */
