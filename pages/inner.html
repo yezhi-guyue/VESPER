@@ -2,6 +2,8 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
+<script src="ls.js"></script>
+<script src="bridge.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>里面</title>
 <link rel="stylesheet" href="s.css">
@@ -576,7 +578,6 @@
     box-shadow:-1px 0 0 rgba(96,112,132,.10) inset,0 8px 18px -10px rgba(78,96,116,.3);
   }
 
-
   /* 点日记本：轻轻鼓一下，然后日记从侧面滑过来，不加阴影，底下不动 */
 
   .pgwrap{position:fixed;inset:0;z-index:130;overflow:hidden;pointer-events:none}
@@ -870,7 +871,7 @@
     </div>
     <input type="file" id="podPick" accept="image/*" style="display:none">
     <audio id="podAudio" preload="none"></audio>
-  <a class="disc" href="music.html" id="discBtn" aria-label="一起听"></a>
+  <a class="disc" href="listen.html?v=3" id="discGo" aria-label="一起听"></a>
   <div class="dmcard" id="dmCard">
     <div class="dmhint"><b>还 没 设 主 页</b><span>去 倒 数 日 里 挑</span></div>
     <div class="dmbox" id="dmBox" aria-label="日历"><svg viewBox="0 0 24 24"><rect x="3.6" y="5" width="16.8" height="15.4" rx="2.4"/><path d="M3.6 9.6h16.8M8 3.2v3.2M16 3.2v3.2"/></svg></div>
@@ -891,13 +892,6 @@
     
   </div>
   
-
-
-
-
-
-
-
 
   <!-- 分组条与格子先撤掉，等她重新排；需要时整段去掉注释即可恢复
   <div class="block">
@@ -1186,7 +1180,6 @@
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',initSet);
   else setTimeout(initSet,0);
 
-
   function cntOf(href){
     if(href==='diary.html'){
       var n=S_.store('hearth_letters',[]).length;
@@ -1222,7 +1215,7 @@
     ['diary.html','日','日记','<svg viewBox="0 0 24 24"><rect x="5" y="3.5" width="14" height="17" rx="2"/><path d="M8.5 8.5h7M8.5 12.5h7M8.5 16.5h4"/></svg>'],
     ['gift.html','礼','礼物盒','<svg viewBox="0 0 24 24"><rect x="3.6" y="6.9" width="16.8" height="4" rx="1.2"/><rect x="4.9" y="10.9" width="14.2" height="9.3" rx="1.5"/><path d="M12 6.9v13.3"/><path d="M12 6.9c0-2.1-2.4-3.2-3.7-2.1-1.2 1 .3 2.3 3.7 2.1z"/><path d="M12 6.9c0-2.1 2.4-3.2 3.7-2.1 1.2 1-.3 2.3-3.7 2.1z"/></svg>'],
     ['album.html','相','相册','<svg viewBox="0 0 24 24"><rect x="3.4" y="5.4" width="17.2" height="13.2" rx="2.2"/><circle cx="8.6" cy="9.9" r="1.3"/><path d="M4.2 16.9l4.3-4.2 3.2 2.9 3.1-3.4 4.9 5.3"/></svg>'],
-    ['music.html','听','一起听','<svg viewBox="0 0 24 24"><path d="M4.2 14.6v-2.4a7.8 7.8 0 0 1 15.6 0v2.4"/><rect x="2.3" y="13.7" width="3.8" height="6.3" rx="1.9"/><rect x="17.9" y="13.7" width="3.8" height="6.3" rx="1.9"/></svg>'],
+    ['listen.html?v=3','听','一起听','<svg viewBox="0 0 24 24"><path d="M4.2 14.6v-2.4a7.8 7.8 0 0 1 15.6 0v2.4"/><rect x="2.3" y="13.7" width="3.8" height="6.3" rx="1.9"/><rect x="17.9" y="13.7" width="3.8" height="6.3" rx="1.9"/></svg>'],
     ['breathe.html','深','夜深','<svg viewBox="0 0 24 24"><path d="M20.6 14.4A8.6 8.6 0 1 1 9.6 3.4a6.8 6.8 0 0 0 11 11z"/><path d="M18.2 4.2v3.1M16.65 5.75h3.1" opacity=".55"/></svg>'],
     ['play.html','盘','命运轮盘','<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.6"/><path d="M12 12V3.4M12 12l7.4 4.3M12 12l-7.4 4.3"/><circle cx="12" cy="12" r="1.5"/></svg>'],
   ];
@@ -1280,7 +1273,7 @@
     function checkUnread(){
       try{
         var x=new XMLHttpRequest();
-        x.open('GET','./diary_add.json?t='+Date.now(),true);
+        x.open('GET','../data/diary_add.json?t='+Date.now(),true);
         x.onload=function(){
           if(x.status!==200 && x.status!==0) return;
           var o=null; try{ o=JSON.parse(x.responseText); }catch(e){ return; }
@@ -1453,7 +1446,7 @@
   }
 
   /* ---- 外面递进来的待办 ---- */
-  var NOTESURL='./notes_add.json';
+  var NOTESURL='../data/notes_add.json';
   var NSYNC='hearth_notes_sync';
   function pullNotes(){
     try{
@@ -1579,7 +1572,6 @@
   });
 })();
 </script>
-
 
 <script>
 (function(){
@@ -1720,7 +1712,6 @@
 })();
 </script>
 
-
 <div class="pwMask" id="pwMask">
   <div class="pwBox" id="pwBox">
     <div class="pt">这 封 信 要 密 码</div>
@@ -1758,7 +1749,7 @@
   (function(){
     try{
       var px=new XMLHttpRequest();
-      px.open('GET','./mail_pass.json?t='+Date.now(),true);
+      px.open('GET','../data/mail_pass.json?t='+Date.now(),true);
       px.onload=function(){
         if(px.status!==200 && px.status!==0) return;
         try{ var o=JSON.parse(px.responseText); if(o&&o.p) PASS=String(o.p); }catch(e){}
@@ -1850,7 +1841,6 @@
   </div>
 </div>
 
-
 <script>
 (function(){
   var bar=document.getElementById('moodBar');
@@ -1908,7 +1898,7 @@
     lpTimer=setTimeout(function(){
       lpFired=true;
       try{ if(navigator.vibrate) navigator.vibrate(12); }catch(e){}
-      location.href='mood.html';
+      location.href='mood.html?v=2';
     },500);
   }
   function lpUp(){
@@ -1959,7 +1949,7 @@
     })(i);
   }
   /* ---- 读 mood.json：我在这边替她点的，会显示成蓝色 ---- */
-  var MOODURL='./mood.json';
+  var MOODURL='../data/mood.json';
   function padn(n){ return n<10? '0'+n : ''+n; }
   var d0=new Date();
   var todayP=padn(d0.getMonth()+1)+'-'+padn(d0.getDate());
@@ -1994,7 +1984,6 @@
     try{ localStorage.removeItem(KEY); }catch(e){}
     paint();
   }, 30000);
-
 
   paintWho();
   paint();
@@ -2119,61 +2108,6 @@
 })();
 </script>
 
-
-<style>
-  .mvOv{position:fixed;inset:0;z-index:998;background:#0b0f13;transform:translateY(101%);
-    pointer-events:none;transition:transform .34s cubic-bezier(.3,.9,.3,1)}
-  .mvOv.on{transform:none;pointer-events:auto}
-  .mvOv iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#0b0f13}
-  #mvClose{position:absolute;left:50%;top:calc(env(safe-area-inset-top) + 9px);transform:translateX(-50%);
-    width:34px;height:34px;border-radius:50%;padding:0;border:1px solid rgba(255,255,255,.16);
-    background:rgba(24,24,24,.5);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
-    color:#e8e8e8;display:flex;align-items:center;justify-content:center;z-index:3}
-  #mvClose svg{width:16px;height:16px;display:block}
-</style>
-
-
-<div class="mvOv" id="mvOv">
-  <button id="mvClose" type="button" aria-label="收起">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
-  </button>
-</div>
-<script>
-(function(){
-  var SRC='http://127.0.0.1:9090/?vesper=1&v=5';
-  var ov=document.getElementById('mvOv');
-  var btn=document.getElementById('discBtn');
-  var cb=document.getElementById('mvClose');
-  var fr=null;
-  function ensure(){
-    if(fr) return;
-    fr=document.createElement('iframe');
-    fr.setAttribute('allow','autoplay; fullscreen');
-    fr.setAttribute('allowfullscreen','');
-    fr.src=SRC;
-    ov.appendChild(fr);
-  }
-  function open(e){
-    if(e) e.preventDefault();
-    ensure();
-    ov.classList.add('on');
-  }
-  function shut(){
-    ov.classList.remove('on');
-  }
-  window.addEventListener('message',function(ev){
-    var d=ev.data||{};
-    if(d.type==='music:close') shut();
-  });
-  if(cb) cb.addEventListener('click',shut);
-  if(btn) btn.addEventListener('click',open);
-  window.__vPlayerOpen=open;
-  window.__vPlayerShut=shut;
-})();
-</script>
-
-</body>
-
 <script>
 (function(){
   var pod=document.getElementById('podCard');
@@ -2185,8 +2119,38 @@
   var fav=document.getElementById('podFav'), btn=document.getElementById('podPlay'), ico=document.getElementById('podIco');
   var prevBtn=document.getElementById('podPrev'), nextBtn=document.getElementById('podNext');
   var au=document.getElementById('podAudio');
-  var K_MODE='hearth_pod_mode', K_VOL='hearth_pod_vol';
+  var K_MODE='hearth_pod_mode', K_VOL='hearth_pod_vol', K_CUR='hearth_pod_cur';
   var queue=[], qi=0, cur=null, liked=false, likeIds={}, seeking=false;
+  var pendingSeek=0, saveT=0;
+  /* 主页这边放着歌也算进一起听的时长 */
+  var TKEY_SHARE = 'hearth_listen_total', shareNew = 0;
+  function commitShare(force){
+    if(shareNew > 0){
+      try{
+        var sv = parseInt(localStorage.getItem(TKEY_SHARE) || '0', 10) || 0;
+        localStorage.setItem(TKEY_SHARE, String(sv + shareNew));
+        shareNew = 0;
+      }catch(e){}
+    }
+    if(force){ try{ if(window.__LS_FLUSH) window.__LS_FLUSH(); }catch(e){} }
+  }
+  setInterval(function(){
+    if(au && au.src && !au.paused && !document.hidden) shareNew += 5;
+  }, 5000);
+  setInterval(function(){ commitShare(false); }, 30000);
+  document.addEventListener('visibilitychange', function(){ if(document.hidden) commitShare(false); });
+  window.addEventListener('pagehide', function(){ commitShare(true); });
+
+  function saveCur(t){
+    if(!cur || (!cur.songId && !cur.id)) return;
+    var pos = (typeof t==='number') ? t : (au.currentTime||0);
+    try{
+      localStorage.setItem(K_CUR, JSON.stringify({
+        id:String(cur.songId || cur.id), name:cur.name||'', artist:cur.artist||'',
+        cover:cur.cover||'', t:Math.round(pos), at:Date.now()
+      }));
+    }catch(e){}
+  }
 
   var I_PLAY='<polygon points="4,0 91.2,50 4,100"/>';
   var I_PAUSE='<rect x="7.5" y="0" width="20.4" height="100" rx="10.2"/><rect x="66.8" y="0" width="20.4" height="100" rx="10.2"/>';
@@ -2219,8 +2183,28 @@
   function loadQueue(then){
     getJSON('http://127.0.0.1:9090/music/recent', function(r){
       if(r && r.ok && r.songs && r.songs.length){ queue=r.songs; qi=0; cur=queue[0]; paint(); }
+      restoreLast();
       if(then) then();
     });
+  }
+
+  /* 上次听的那首，回来还是那首 */
+  function restoreLast(){
+    var s=null;
+    try{ s=JSON.parse(localStorage.getItem(K_CUR)||'null'); }catch(e){ s=null; }
+    if(!s || !s.id) return;
+    var k=-1;
+    for(var i=0;i<queue.length;i++){
+      if(String(queue[i].songId)===String(s.id)){ k=i; break; }
+    }
+    if(k>=0){ qi=k; cur=queue[k]; }
+    else if(s.name){
+      cur={songId:s.id, name:s.name, artist:s.artist||'', cover:s.cover||''};
+      queue.unshift(cur); qi=0;
+    } else return;
+    pendingSeek=(s.t>3? s.t : 0);
+    paint();
+    if(pendingSeek){ curT.textContent=mmss(pendingSeek); }
   }
 
   function paint(){
@@ -2233,10 +2217,12 @@
     checkLike();
   }
 
-  function playAt(i){
+  function playAt(i, keepSeek){
     if(!queue.length) return;
     qi=((i%queue.length)+queue.length)%queue.length;
     cur=queue[qi]; paint();
+    if(!keepSeek) pendingSeek=0;
+    saveCur(0);
     getJSON('http://127.0.0.1:9090/music/url?id='+encodeURIComponent(cur.songId), function(d){
       if(!d) return;
       if(!d.ok){ n.textContent='放 不 了'; return; }
@@ -2249,13 +2235,22 @@
 
   au.addEventListener('play', function(){ setIco(I_PAUSE); });
   au.addEventListener('pause', function(){ setIco(I_PLAY); });
-  au.addEventListener('loadedmetadata', function(){ durT.textContent=mmss(au.duration); });
+  au.addEventListener('loadedmetadata', function(){
+    durT.textContent=mmss(au.duration);
+    if(pendingSeek>0 && au.duration && pendingSeek<au.duration-3){
+      try{ au.currentTime=pendingSeek; }catch(e){}
+    }
+    pendingSeek=0;
+  });
   au.addEventListener('timeupdate', function(){
     if(!au.duration) return;
     var pc=au.currentTime/au.duration*100;
     if(!seeking){ pp.style.width=pc.toFixed(2)+'%'; dt.style.left=pc.toFixed(2)+'%'; }
     curT.textContent=mmss(au.currentTime);
+    var now=Date.now();
+    if(au.currentTime>0 && now-saveT>5000){ saveT=now; saveCur(); }
   });
+  au.addEventListener('pause', function(){ setIco(I_PLAY); saveCur(); });
   au.addEventListener('ended', function(){
     setIco(I_PLAY);
     playAt(qi+1);
@@ -2265,7 +2260,7 @@
     e.stopPropagation();
     if(!queue.length){ loadQueue(function(){ playAt(0); }); return; }
     if(au.paused){
-      if(!au.getAttribute('src')) playAt(qi);
+      if(!au.getAttribute('src')) playAt(qi, true);
       else au.play();
     } else au.pause();
   });
@@ -2319,18 +2314,93 @@
     });
   });
 
-  var lp=null;
-  function inCtrl(t){ return t && t.closest && t.closest('.pbtn,.kbtn,.bar,.fav,.cov'); }
-  function lpStart(e){ if(inCtrl(e.target)) return; lp=setTimeout(function(){ lp=null; if(window.self!==window.top){ try{ window.parent.postMessage({type:'vesper:player-open'},'*'); }catch(err){} } else { location.href='music.html'; } },650); }
+  var lp=null, jumped=false, tX=0, tY=0, tT=0, tMoved=false;
+  function inCtrl(t){ return t && t.closest && t.closest('.pbtn,.kbtn,.bar,.fav'); }
+  function saveQueue(){
+    try{
+      var songs = queue && queue.slice ? queue.slice() : [];
+      var at = qi;
+      if(cur){
+        var id = String(cur.songId || cur.id || '');
+        var k = -1;
+        for(var i=0;i<songs.length;i++){
+          if(String(songs[i].songId||songs[i].id) === id){ k = i; break; }
+        }
+        if(k >= 0){ at = k; }
+        else if(id){ songs = [cur].concat(songs); at = 0; }
+      }
+      localStorage.setItem('hearth_pod_queue', JSON.stringify({ songs:songs, at:at }));
+    }catch(e){}
+  }
+  function goListen(){
+    saveCur();
+    try{ if(window.__LS_FLUSH) window.__LS_FLUSH(); }catch(e){}
+    var q = [];
+    var id = cur ? String(cur.songId || cur.id || '') : '';
+    var t = Math.floor((au && au.currentTime) || 0);
+    if(id){
+      q.push('play=' + encodeURIComponent(id));
+      q.push('t=' + t);
+      if(cur.name) q.push('nm=' + encodeURIComponent(cur.name));
+      if(cur.artist) q.push('ar=' + encodeURIComponent(cur.artist));
+      if(cur.cover) q.push('cv=' + encodeURIComponent(cur.cover));
+      try{
+        localStorage.setItem('hearth_go', JSON.stringify({
+          id:id, name:cur.name||'', artist:cur.artist||'', cover:cur.cover||'', t:t, at:Date.now()
+        }));
+      }catch(e){}
+    }
+    var url = 'listen.html?v=3' + (q.length ? ('&' + q.join('&')) : '');
+    if(window.self!==window.top){
+      try{ window.parent.postMessage({type:'vesper:open-listen', href:url},'*'); }catch(err){}
+    }
+    location.href = url;
+  }
+  /* 主页那张环形唱片：跟卡片轻点走同一条路，带着当前这首进去 */
+  var discGo = document.getElementById('discGo');
+  if(discGo){
+    discGo.addEventListener('click', function(e){
+      e.preventDefault();
+      goListen();
+    });
+  }
+  function lpStart(e){
+    if(inCtrl(e.target)) return;
+    var p = e.touches ? e.touches[0] : e;
+    tX = p.clientX; tY = p.clientY; tT = Date.now(); tMoved = false;
+    lp=setTimeout(function(){
+      lp=null; jumped=true;
+      saveCur();
+      if(window.self!==window.top){ try{ window.parent.postMessage({type:'vesper:player-open'},'*'); }catch(err){} }
+      else { location.href='listen.html?v=3'; }
+    },650);
+  }
   function lpEnd(){ if(lp){ clearTimeout(lp); lp=null; } }
+  function lpMove(e){
+    var p = e.touches ? e.touches[0] : e;
+    if(Math.abs(p.clientX-tX)>12 || Math.abs(p.clientY-tY)>12) tMoved = true;
+    lpEnd();
+  }
+  /* 轻点卡片本身：直接进一起听，接着这首放下去 */
+  function tapEnd(e){
+    if(lp){ clearTimeout(lp); lp=null; }
+    if(jumped){ jumped=false; return; }
+    if(inCtrl(e.target)) return;
+    if(tMoved) return;
+    if(Date.now()-tT > 650) return;
+    goListen();
+  }
   pod.addEventListener('touchstart', lpStart, {passive:true});
-  pod.addEventListener('touchmove', lpEnd, {passive:true});
-  pod.addEventListener('touchend', lpEnd);
+  pod.addEventListener('touchmove', lpMove, {passive:true});
+  pod.addEventListener('touchend', tapEnd);
   pod.addEventListener('mousedown', lpStart);
-  pod.addEventListener('mouseup', lpEnd);
+  pod.addEventListener('mousemove', lpMove);
+  pod.addEventListener('mouseup', tapEnd);
   pod.addEventListener('mouseleave', lpEnd);
 
   setIco(I_PLAY);
+  window.addEventListener('pagehide', function(){ saveCur(); });
+  document.addEventListener('visibilitychange', function(){ if(document.hidden) saveCur(); });
   loadQueue();
 })();
 </script>
@@ -2347,4 +2417,5 @@
   try{ show(localStorage.getItem(KEY)||''); }catch(e){}
 })();
 </script>
+</body>
 </html>
