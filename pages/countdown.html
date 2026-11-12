@@ -2,6 +2,8 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
+<script src="ls.js"></script>
+<script src="bridge.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>倒数日</title>
 <style>
@@ -266,7 +268,7 @@
   function save(){ try{ localStorage.setItem(KEY,JSON.stringify(arr)); }catch(e){} }
 
   /* ---- 别人替我加卡：读 cd_add.json ---- */
-  var CDURL='./cd_add.json';
+  var CDURL='../data/cd_add.json';
   var SYNCK='hearth_cd_sync';
   function pullCd(){
     try{
