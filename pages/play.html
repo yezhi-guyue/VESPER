@@ -2,6 +2,8 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
+<script src="ls.js"></script>
+<script src="bridge.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>命运轮盘</title>
 <style>
@@ -505,7 +507,7 @@
   core.addEventListener('click',spin);
 
   /* ---- 别人替我转：读指令文件 ---- */
-  var CMDURL='./wheel_cmd.json';
+  var CMDURL='../data/wheel_cmd.json';
   var lastSeq=0, firstPull=true;
   function pullCmd(){
     try{
