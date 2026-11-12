@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<script src="ls.js"></script>
+<script src="bridge.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#fbfcfd">
+<meta name="color-scheme" content="light">
+<title>歌单</title>
+<style>
+  :root{--st:max(env(safe-area-inset-top),30px)}
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html{height:100%;background:#fbfcfd;color-scheme:light}
+  html,body{overflow:hidden}
+  body{
+    position:fixed;inset:0;
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans CJK SC",sans-serif;
+    -webkit-text-size-adjust:100%;color:#474c50;
+    background:linear-gradient(#fbfcfd 0%, #f4f6f8 100%);
+    animation:pin .5s ease both;
+  }
+  @keyframes pin{from{opacity:0}to{opacity:1}}
+
+  .page{
+    position:absolute;inset:0;z-index:2;
+    overflow-y:auto;-webkit-overflow-scrolling:touch;
+    padding-bottom:calc(env(safe-area-inset-bottom) + 92px);
+  }
+  .page::-webkit-scrollbar{display:none}
+
+  /* ---------- 上半部分：图 ---------- */
+  .hero{
+    position:relative;
+    height:44vh;min-height:250px;max-height:400px;
+    overflow:hidden;background:#e9ecef;
+  }
+  .hero .pic{
+    position:absolute;inset:0;width:100%;height:100%;
+    object-fit:cover;display:block;
+    filter:blur(var(--plblur,0px)) saturate(.86) brightness(1.02);
+    opacity:0;transition:opacity .5s ease;
+  }
+  .hero .pic.on{opacity:1}
+  .hero .ph{
+    position:absolute;inset:0;
+    background:
+      radial-gradient(circle at 26% 22%,rgba(236,226,212,.9),rgba(214,206,196,.9) 55%,rgba(190,182,172,.95));
+  }
+  .hero .veil{
+    position:absolute;inset:0;
+    background:linear-gradient(180deg,
+      rgba(38,44,50,.20) 0%,
+      rgba(38,44,50,.04) 34%,
+      rgba(251,252,253,0) 56%,
+      rgba(251,252,253,.94) 100%);
+  }
+  .hero .htop{
+    position:absolute;left:0;right:0;top:0;
+    padding:calc(var(--st) - 4px) 16px 0;
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .hero .ic{
+    width:34px;height:34px;border-radius:50%;flex:none;
+    display:flex;align-items:center;justify-content:center;
+    border:0;font-family:inherit;padding:0;cursor:pointer;
+    color:#4d565e;background:rgba(255,255,255,.72);
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
+    box-shadow:0 2px 10px rgba(70,80,90,.14),inset 0 0 0 1px rgba(255,255,255,.7);
+    text-decoration:none;
+  }
+  .hero .ic svg{width:17px;height:17px;display:block}
+  .hero .hinfo{
+    position:absolute;left:22px;right:22px;bottom:14px;
+  }
+  .hero .hname{
+    font-size:19px;line-height:1.25;letter-spacing:.08em;
+    color:#333a40;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .hero .hmeta{
+    margin-top:8px;font-size:10px;line-height:1;letter-spacing:.16em;text-indent:.16em;
+    color:#98a1a8;
+  }
+
+  /* ---------- 下面：歌 ---------- */
+  .body{padding:14px 18px 0}
+  .playall{padding:0 0 12px}
+  .playall button{
+    width:100%;height:42px;border-radius:15px;border:0;cursor:pointer;
+    font-family:inherit;font-size:11.5px;letter-spacing:.22em;text-indent:.22em;
+    color:#fff;background:#87929c;
+    box-shadow:0 10px 22px -14px rgba(80,92,104,.85),inset 0 0 0 1px rgba(255,255,255,.18);
+  }
+  .playall button:active{transform:scale(.99)}
+  .row{
+    position:relative;display:flex;align-items:center;gap:13px;
+    padding:8px 4px;border-radius:16px;
+    transition:background .18s ease,transform .18s ease;
+  }
+  .row:active{background:rgba(255,255,255,.9);transform:scale(.988)}
+  .cv{
+    position:relative;width:46px;height:46px;flex:none;border-radius:50%;
+    overflow:hidden;background:#eff2f5;
+    box-shadow:0 4px 12px -6px rgba(120,135,148,.4);
+  }
+  .cv img{width:100%;height:100%;object-fit:cover;display:block;filter:saturate(.72)}
+  .tx{flex:1;min-width:0}
+  .tx b{
+    display:block;font-size:12.5px;font-weight:400;line-height:1.35;
+    letter-spacing:.06em;color:#4c545a;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .tx em{
+    display:block;font-style:normal;font-size:10px;line-height:1.4;
+    letter-spacing:.06em;color:#a9b2b9;margin-top:3px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .row .no{
+    flex:none;width:20px;text-align:right;
+    font-size:10px;letter-spacing:.02em;color:#c6ccd1;
+  }
+  .hint{
+    text-align:center;color:#bdb7af;
+    font-size:11px;letter-spacing:.22em;text-indent:.22em;
+    padding:34px 0;
+  }
+
+  /* ---------- 底栏 ---------- */
+  .tab{
+    position:fixed;left:0;right:0;bottom:0;z-index:20;
+    height:calc(env(safe-area-inset-bottom) + 58px);
+    padding-bottom:env(safe-area-inset-bottom);
+    display:flex;align-items:center;
+    background:rgba(233,237,240,.84);
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    box-shadow:0 -1px 0 rgba(196,203,209,.60);
+  }
+  .tab>a{position:relative;flex:1;height:100%;display:flex;align-items:center;justify-content:center;
+    font-size:11px;letter-spacing:.26em;text-indent:.26em;font-weight:400;
+    color:#9aa1a7;text-decoration:none}
+  .tab>*+*::before{
+    content:'';position:absolute;left:0;top:50%;
+    transform:translateY(-50%);
+    width:1px;height:18px;
+    background:rgba(138,150,161,.45);
+  }
+
+  /* ---------- 换图面板 ---------- */
+  .setmask{
+    position:fixed;inset:0;z-index:38;
+    background:rgba(44,50,56,.26);
+    backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);
+    opacity:0;pointer-events:none;transition:opacity .3s ease;
+  }
+  .setmask.on{opacity:1;pointer-events:auto}
+  .sheet{
+    position:fixed;left:0;right:0;bottom:0;z-index:40;
+    padding:22px 22px calc(env(safe-area-inset-bottom) + 26px);
+    border-radius:24px 24px 0 0;
+    background:linear-gradient(#fdfefe 0%, #f7f9fa 100%);
+    box-shadow:0 -1px 0 rgba(255,255,255,.9),0 -12px 40px rgba(96,110,124,.20);
+    transform:translateY(104%);transition:transform .34s cubic-bezier(.22,1,.36,1);
+  }
+  .sheet.on{transform:none}
+  .sheet .hd{
+    display:flex;align-items:center;margin-bottom:18px;
+    font-size:12px;letter-spacing:.24em;text-indent:.24em;color:#727c84;
+  }
+  .sheet .hd .x{
+    margin-left:auto;width:26px;height:26px;border:0;background:transparent;
+    font-family:inherit;font-size:17px;line-height:1;color:#a2abb2;cursor:pointer;
+  }
+  .sheet .lbl{margin:2px 0 10px;font-size:11px;letter-spacing:.2em;text-indent:.2em;color:#8d959c}
+  .sheet .pick{
+    position:relative;display:block;width:100%;height:98px;border-radius:16px;
+    border:0;padding:0;overflow:hidden;cursor:pointer;background:#eff2f5;
+    background-size:cover;background-position:center;
+    box-shadow:inset 0 0 0 1px rgba(203,212,219,.9),0 8px 18px -14px rgba(110,126,140,.5);
+  }
+  .sheet .pick .ph{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-size:10.5px;letter-spacing:.22em;text-indent:.22em;color:#aeb6bc;
+    background:linear-gradient(120deg,#f7f9fb,#e9edf1);
+  }
+  .sheet .pick.has .ph{display:none}
+  .sheet .tools{display:flex;gap:12px;margin-top:14px}
+  .sheet .tools button{
+    flex:1;height:38px;border-radius:12px;border:0;cursor:pointer;
+    font-family:inherit;font-size:11.5px;letter-spacing:.16em;text-indent:.16em;
+    color:#6b747c;background:rgba(240,243,246,.96);
+    box-shadow:inset 0 0 0 1px rgba(203,212,219,.9);
+  }
+  .sheet .tools button.main{color:#fff;background:#7e8b96;box-shadow:none}
+</style>
+</head>
+<body>
+
+<div class="page" id="page">
+  <div class="hero" id="hero">
+    <div class="ph"></div>
+    <img class="pic" id="pic" alt="">
+    <div class="veil"></div>
+    <div class="htop">
+      <a class="ic" href="home.html?v=4" aria-label="返回">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+      </a>
+      <button class="ic" id="setBtn" type="button" aria-label="换图">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3.2" y="5" width="17.6" height="14" rx="2.6"/><circle cx="9" cy="10" r="1.6"/><path d="M4.4 17.4l4.6-4.3 3.4 3.1 3-2.7 4.2 3.9"/></svg>
+      </button>
+    </div>
+    <div class="hinfo">
+      <div class="hname" id="plName">歌 单</div>
+      <div class="hmeta" id="plMeta">在 拉 取</div>
+    </div>
+  </div>
+
+  <div class="body">
+    <div class="playall"><button id="playAll" type="button">全 部 播 放</button></div>
+    <div id="list"><div class="hint">在 拉 曲 目</div></div>
+  </div>
+</div>
+
+<div class="setmask" id="setMask"></div>
+<div class="sheet" id="sheet">
+  <div class="hd">歌 单 顶 部 图<button class="x" id="setX" type="button">×</button></div>
+  <div class="lbl">上 半 部 分 那 张 图</div>
+  <button class="pick" id="pick" type="button"><span class="ph">点 这 里 换 一 张</span></button>
+  <div class="tools">
+    <button type="button" id="useCv">用 歌 单 封 面</button>
+    <button type="button" class="main" id="setDone">好 了</button>
+  </div>
+</div>
+
+<input type="file" accept="image/*" id="picIn" style="display:none">
+
+<div class="tab">
+  <a href="listen.html?v=3">一起听</a>
+  <a href="list.html">搜索</a>
+  <a href="home.html?v=4">主页</a>
+</div>
+
+<script>
+(function(){
+  var API = 'http://127.0.0.1:9090';
+  var PLK = 'hearth_pl_bg';
+
+  var page = document.getElementById('page');
+  var picEl = document.getElementById('pic');
+  var listEl = document.getElementById('list');
+  var nmEl = document.getElementById('plName');
+  var mtEl = document.getElementById('plMeta');
+
+  var qs = new URLSearchParams(location.search);
+  var pid = qs.get('id') || '';
+  var pnm = qs.get('nm') || '';
+  var pcv = qs.get('cv') || '';
+
+  if(pnm) nmEl.textContent = pnm;
+
+  function esc(s){
+    return String(s == null ? '' : s)
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function get(url, cb){
+    var x = new XMLHttpRequest();
+    x.open('GET', url, true);
+    x.timeout = 12000;
+    x.onload = function(){
+      var d = null;
+      try{ d = JSON.parse(x.responseText); }catch(e){}
+      cb(d);
+    };
+    x.onerror = x.ontimeout = function(){ cb(null); };
+    x.send();
+  }
+
+  /* ---------- 顶部那张图 ---------- */
+  function setPic(src){
+    if(src){
+      picEl.onload = function(){ picEl.classList.add('on'); };
+      picEl.onerror = function(){ picEl.classList.remove('on'); };
+      picEl.src = src;
+    }else{
+      picEl.removeAttribute('src');
+      picEl.classList.remove('on');
+    }
+  }
+
+  var pick = document.getElementById('pick');
+
+  /* 主页那边调的歌单顶图模糊度，这里跟着用 */
+  function applyPlBlur(){
+    var b = parseInt(localStorage.getItem('hearth_pl_blur'), 10);
+    if(isNaN(b)) b = 0;
+    document.documentElement.style.setProperty('--plblur', b + 'px');
+  }
+
+  function applyHeader(){
+    applyPlBlur();
+    var v = '';
+    try{ v = localStorage.getItem(PLK) || ''; }catch(e){}
+    var src = v || pcv || '';
+    setPic(src);
+    if(v){
+      pick.style.backgroundImage = 'url("' + v + '")';
+      pick.classList.add('has');
+    }else{
+      pick.style.backgroundImage = '';
+      pick.classList.remove('has');
+    }
+  }
+
+  function shrink(file, max, q, cb){
+    var fr = new FileReader();
+    fr.onload = function(){
+      var im = new Image();
+      im.onload = function(){
+        var w = im.width || 1, h = im.height || 1;
+        var sc = Math.min(1, max / Math.max(w, h));
+        var c = document.createElement('canvas');
+        c.width = Math.max(1, Math.round(w * sc));
+        c.height = Math.max(1, Math.round(h * sc));
+        try{
+          c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+          cb(c.toDataURL('image/jpeg', q));
+        }catch(e){ cb(null); }
+      };
+      im.onerror = function(){ cb(null); };
+      im.src = fr.result;
+    };
+    fr.onerror = function(){ cb(null); };
+    fr.readAsDataURL(file);
+  }
+
+  /* ---------- 曲目 ---------- */
+  var songs = [];
+
+  function paintList(){
+    if(!songs.length){
+      listEl.innerHTML = '<div class="hint">这 个 歌 单 是 空 的</div>';
+      return;
+    }
+    var h = '';
+    songs.forEach(function(s, i){
+      var cv = s.cover
+        ? '<img src="' + esc(s.cover) + '" alt="">'
+        : '';
+      h += '<div class="row" data-i="' + i + '">' +
+             '<span class="cv">' + cv + '</span>' +
+             '<span class="tx"><b>' + esc(s.name || '') + '</b><em>' + esc(s.artist || '') + '</em></span>' +
+             '<span class="no">' + (i + 1) + '</span>' +
+           '</div>';
+    });
+    listEl.innerHTML = h;
+  }
+
+  function toListen(s){
+    var q = '?v=2&play=' + encodeURIComponent(s.songId != null ? s.songId : (s.id || '')) +
+            '&nm=' + encodeURIComponent(s.name || '') +
+            '&ar=' + encodeURIComponent(s.artist || '') +
+            '&cv=' + encodeURIComponent(s.cover || '');
+    location.href = 'listen.html' + q;
+  }
+
+  listEl.addEventListener('click', function(e){
+    var row = e.target.closest ? e.target.closest('.row') : null;
+    if(!row) return;
+    var s = songs[+row.getAttribute('data-i')];
+    if(s) toListen(s);
+  });
+
+  /* 全部播放：整张歌单推进一起听的列表，然后跳过去放第一首 */
+  document.getElementById('playAll').addEventListener('click', function(){
+    if(!songs.length) return;
+    try{ if(window.__LS_RELOAD) window.__LS_RELOAD(); }catch(e){}
+    var q = null;
+    try{ q = JSON.parse(localStorage.getItem('hearth_pod_queue') || 'null'); }catch(e){}
+    if(!q || !q.songs) q = { songs: [], at: 0 };
+    var seen = {};
+    q.songs.forEach(function(s){
+      if(s && s.songId != null) seen[String(s.songId)] = 1;
+    });
+    songs.forEach(function(s){
+      var id = String(s.songId != null ? s.songId : (s.id || ''));
+      if(!id || seen[id]) return;
+      seen[id] = 1;
+      q.songs.push({
+        songId: s.songId != null ? s.songId : s.id,
+        name: s.name || '', artist: s.artist || '',
+        album: s.album || '', cover: s.cover || ''
+      });
+    });
+    try{
+      localStorage.setItem('hearth_pod_queue', JSON.stringify({ songs: q.songs, at: 0 }));
+      localStorage.removeItem('hearth_pod_empty');
+    }catch(e){}
+    try{ if(window.__LS_FLUSH) window.__LS_FLUSH(); }catch(e){}
+    var first = songs[0];
+    location.href = 'listen.html?v=3&play=' + encodeURIComponent(first.songId != null ? first.songId : (first.id || '')) +
+      '&nm=' + encodeURIComponent(first.name || '') +
+      '&ar=' + encodeURIComponent(first.artist || '') +
+      '&cv=' + encodeURIComponent(first.cover || '');
+  });
+
+  if(!pid){
+    mtEl.textContent = '没 有 指 定 歌 单';
+    listEl.innerHTML = '<div class="hint">回 去 重 新 进 一 次</div>';
+    applyHeader();
+    return;
+  }
+
+  applyHeader();
+
+  get(API + '/music/netease/playlist?id=' + encodeURIComponent(pid), function(d){
+    if(!d || !d.ok){
+      mtEl.textContent = '拉 不 到 这 个 歌 单';
+      listEl.innerHTML = '<div class="hint">稍 后 再 试</div>';
+      return;
+    }
+    if(d.name) nmEl.textContent = d.name;
+    songs = d.songs || [];
+    mtEl.textContent = (d.total || songs.length) + ' 首';
+    paintList();
+  });
+
+  /* ---------- 面板 ---------- */
+  var setMask = document.getElementById('setMask');
+  var sheet = document.getElementById('sheet');
+
+  document.getElementById('setBtn').addEventListener('click', function(){
+    applyHeader();
+    setMask.classList.add('on');
+    sheet.classList.add('on');
+  });
+  function closeSet(){
+    setMask.classList.remove('on');
+    sheet.classList.remove('on');
+  }
+  setMask.addEventListener('click', closeSet);
+  document.getElementById('setX').addEventListener('click', closeSet);
+  document.getElementById('setDone').addEventListener('click', closeSet);
+
+  var picIn = document.getElementById('picIn');
+  pick.addEventListener('click', function(){ picIn.click(); });
+  picIn.addEventListener('change', function(){
+    var f = this.files && this.files[0];
+    if(!f) return;
+    shrink(f, 1100, .78, function(v){
+      if(!v) return;
+      try{ localStorage.setItem(PLK, v); }catch(e){}
+      try{ if(window.__LS_FLUSH) window.__LS_FLUSH(); }catch(e){}
+      applyHeader();
+    });
+    this.value = '';
+  });
+
+  document.getElementById('useCv').addEventListener('click', function(){
+    try{ localStorage.removeItem(PLK); }catch(e){}
+    try{ if(window.__LS_FLUSH) window.__LS_FLUSH(); }catch(e){}
+    applyHeader();
+  });
+})();
+</script>
+</body>
+</html>
