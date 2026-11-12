@@ -2,6 +2,8 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
+<script src="ls.js"></script>
+<script src="bridge.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>日记</title>
 <style>html,body{background:#fffdfb;min-height:100%}  .bkbar{
@@ -459,7 +461,7 @@
   function save(){ S_.setStore(LKEY,mine); }
 
   /* ---- 别人替我写的日记：读 diary_add.json ---- */
-  var NEWURL='./diary_add.json';
+  var NEWURL='../data/diary_add.json';
   var DSYNC='hearth_diary_sync';
   function pullDiary(){
     try{
@@ -497,7 +499,7 @@
     function markSeen(){
       try{
         var x=new XMLHttpRequest();
-        x.open('GET','./diary_add.json?t='+Date.now(),true);
+        x.open('GET','../data/diary_add.json?t='+Date.now(),true);
         x.onload=function(){
           if(x.status!==200 && x.status!==0) return;
           var o=null; try{ o=JSON.parse(x.responseText); }catch(e){ return; }
