@@ -2,6 +2,8 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
+<script src="ls.js"></script>
+<script src="bridge.js"></script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>礼物盒</title>
 <link rel="stylesheet" href="s.css?v=6">
@@ -283,10 +285,11 @@
 
   let gifts=S_.store(GKEY,[]);
   (function(){ var ch=false; gifts.forEach(function(x){ if(!x.date){ x.date=(x.added||'').slice(0,10)||todayStr(); ch=true; } }); if(ch) S_.setStore(GKEY,gifts); })();
-  if(!gifts.length){
+  if(!gifts.length && !localStorage.getItem('hearth_gifts_init')){
     gifts=[{id:'seed_star',name:'第 一 个 礼 物 星 星',size:STAR_GIFT.length,code:STAR_GIFT,added:'2026-11-05T23:20:00',box:0}];
     S_.setStore(GKEY,gifts);
   }
+  try{ localStorage.setItem('hearth_gifts_init','1'); }catch(e){}
 
   const listEl=document.getElementById('list');
   const cnt=document.getElementById('cnt');
@@ -428,6 +431,8 @@
         clearTimeout(tmr);
         gifts=gifts.filter(function(x){ return x.id!==g.id; });
         save(); render();
+        /* 删完立刻写盘，不等那 700 毫秒 */
+        if(window.__LS_FLUSH) setTimeout(function(){ try{ window.__LS_FLUSH(); }catch(e){} }, 30);
       });
 
       tag.addEventListener('click',function(){ openBox(g, (typeof g.box==='number'? g.box : idx%3)); });
@@ -675,7 +680,7 @@
   document.getElementById('saveSlot').appendChild(saveBtn);
 
   /* ---- 别人替我放礼物：读 gifts_inbox.json ---- */
-  var INBOX='./gifts_inbox.json';
+  var INBOX='../data/gifts_inbox.json';
   var TSKEY='hearth_gifts_ts';
   var lastTs=0;
   try{ lastTs=parseInt(localStorage.getItem(TSKEY)||'0',10)||0; }catch(e){ lastTs=0; }
