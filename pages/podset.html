@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<script src="ls.js"></script>
+<script src="bridge.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#fbfcfd">
+<meta name="color-scheme" content="light">
+<title>设置</title>
+<style>
+  :root{--st:max(env(safe-area-inset-top),30px)}
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html{height:100%;background:#fbfcfd;color-scheme:light}
+  html,body{overflow:hidden}
+  body{
+    position:fixed;inset:0;
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans CJK SC",sans-serif;
+    -webkit-text-size-adjust:100%;
+    color:#474c50;
+    background:linear-gradient(#fbfcfd 0%, #f4f6f8 100%);
+    background-color:#fbfcfd;
+  }
+
+  /* 置顶灰栏 */
+  .topbar{
+    position:fixed;left:0;right:0;top:0;z-index:20;
+    padding:var(--st) 18px 0;
+    height:calc(var(--st) + 20px);
+    display:flex;align-items:center;justify-content:space-between;
+    background:rgba(214,221,227,.94);
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    box-shadow:0 1px 0 rgba(168,180,190,.75);
+  }
+  .ic{
+    width:30px;height:30px;border-radius:50%;flex:none;
+    display:flex;align-items:center;justify-content:center;
+    color:#5b666e;text-decoration:none;
+    transform:translateY(-16px);
+  }
+  .ic svg{width:17px;height:17px;display:block}
+  .ttl{
+    position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    font-size:12px;letter-spacing:.42em;text-indent:.42em;color:#667079;
+    pointer-events:none;
+  }
+
+  /* 内容 */
+  .page{
+    position:absolute;inset:0;
+    padding:calc(var(--st) + 52px) 20px calc(env(safe-area-inset-bottom) + 40px);
+    overflow-y:auto;-webkit-overflow-scrolling:touch;
+  }
+  .page::-webkit-scrollbar{display:none}
+
+  .sec{
+    font-size:11.5px;letter-spacing:.26em;text-indent:.26em;color:#8d959c;
+    margin:6px 0 14px 2px;
+  }
+
+  .card{
+    border-radius:20px;
+    background:rgba(255,255,255,.90);
+    box-shadow:0 1px 1px rgba(126,140,152,.08), 0 10px 24px rgba(126,140,152,.09), 0 0 0 1px rgba(203,212,219,.7);
+    padding:14px;
+  }
+
+  .prev{
+    position:relative;
+    width:100%;height:150px;border-radius:14px;overflow:hidden;
+    background:linear-gradient(150deg,#eef2f5,#dde4ea);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .prev img{width:100%;height:100%;object-fit:cover;display:block}
+  .prev .ph{
+    font-size:11px;letter-spacing:.24em;color:#9aa4ac;
+  }
+
+  .btns{display:flex;gap:10px;margin-top:14px}
+  button{
+    flex:1;height:44px;border:0;border-radius:14px;
+    font-family:inherit;font-size:12px;letter-spacing:.16em;
+    transition:transform .18s ease,opacity .18s ease;
+  }
+  button:active{transform:scale(.985);opacity:.9}
+  .ghost{background:rgba(232,237,241,.95);color:#5a646c}
+  .main{background:#5b6871;color:#fbfcfd}
+
+  .tip{
+    margin-top:14px;font-size:10.5px;line-height:2;letter-spacing:.1em;
+    color:#a2aab1;padding:0 4px;
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="ic" href="list.html" aria-label="返回">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+  </a>
+  <span class="ttl">设置</span>
+</div>
+
+<div class="page">
+  <div class="sec">一起听的背景</div>
+
+  <div class="card">
+    <div class="prev" id="prev"><span class="ph">还没有设背景</span></div>
+    <div class="btns">
+      <button class="ghost" id="clear">用回默认</button>
+      <button class="main" id="pick">选一张</button>
+    </div>
+  </div>
+
+  <div class="tip">背景会铺在列表页，模糊打底再压一层白纱，字看得清。图存在本机，重开页面也还在。</div>
+</div>
+
+<input type="file" id="f" accept="image/*" style="display:none">
+
+<script>
+(function(){
+  var KEY = 'hearth_pod_wall';
+  var prev = document.getElementById('prev');
+  var f = document.getElementById('f');
+
+  function paint(u){
+    if(!u){
+      prev.innerHTML = '<span class="ph">还没有设背景</span>';
+      return;
+    }
+    prev.innerHTML = '';
+    var img = new Image();
+    img.src = u;
+    prev.appendChild(img);
+  }
+
+  try{ paint(localStorage.getItem(KEY)); }catch(e){}
+
+  document.getElementById('pick').addEventListener('click', function(){ f.click(); });
+
+  document.getElementById('clear').addEventListener('click', function(){
+    try{ localStorage.removeItem(KEY); }catch(e){}
+    paint('');
+  });
+
+  f.addEventListener('change', function(){
+    var file = f.files && f.files[0];
+    if(!file) return;
+    var r = new FileReader();
+    r.onload = function(){
+      var img = new Image();
+      img.onload = function(){
+        var max = 1400, w = img.width, h = img.height;
+        if(w > max){ h = Math.round(h * max / w); w = max; }
+        var c = document.createElement('canvas');
+        c.width = w; c.height = h;
+        c.getContext('2d').drawImage(img, 0, 0, w, h);
+        var d = '';
+        try{ d = c.toDataURL('image/jpeg', .75); }catch(e){}
+        if(!d) return;
+        try{ localStorage.setItem(KEY, d); }catch(e){}
+        paint(d);
+      };
+      img.src = r.result;
+    };
+    r.readAsDataURL(file);
+    f.value = '';
+  });
+})();
+</script>
+</body>
+</html>
