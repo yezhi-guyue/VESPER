@@ -1903,23 +1903,6 @@
     toast('名字存好了');
   });
 
-  /* ---- 返回：从哪来就回哪去，实在没来路才退列表 ---- */
-  (function(){
-    var b = document.getElementById('backBtn');
-    if(!b) return;
-    b.addEventListener('click', function(e){
-      var r = '';
-      try{ r = document.referrer || ''; }catch(err){}
-      var same = r && (r.indexOf('/pages/') >= 0 || r.indexOf('github.io') >= 0 ||
-                       r.indexOf('127.0.0.1') >= 0 || r.indexOf('localhost') >= 0 ||
-                       r.indexOf('file://') === 0);
-      if(same && window.history && history.length > 1){
-        e.preventDefault();
-        if(e.stopImmediatePropagation) e.stopImmediatePropagation();
-        history.back();
-      }
-    });
-  })();
   /* ---- 写盘没完就先别跳页，别让最后几片被掐掉 ---- */
   document.addEventListener('click', function(e){
     var a = e.target && e.target.closest ? e.target.closest('a[href]') : null;
