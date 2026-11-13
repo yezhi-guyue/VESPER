@@ -150,9 +150,16 @@
       0 4px 12px rgba(110,125,140,.16),
       inset 0 0 0 1px rgba(255,255,255,.10);
     animation-play-state:paused;
+    will-change:transform;
+    transform:translateZ(0);
+    backface-visibility:hidden;
+    -webkit-backface-visibility:hidden;
   }
   .disc.spin{animation:spin 22s linear infinite}
-  @keyframes spin{to{transform:rotate(360deg)}}
+  @keyframes spin{
+    from{transform:rotate(0deg) translateZ(0)}
+    to{transform:rotate(360deg) translateZ(0)}
+  }
   .disc .art{
     position:absolute;left:50%;top:50%;
     width:56%;height:56%;transform:translate(-50%,-50%);
@@ -635,7 +642,7 @@
 
 
 <div class="top">
-  <a class="ic" href="list.html" aria-label="返回">
+  <a class="ic" id="backBtn" href="list.html" aria-label="返回">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
   </a>
   <span class="topnames" id="names">夜凪·孤月</span>
@@ -1896,6 +1903,23 @@
     toast('名字存好了');
   });
 
+  /* ---- 返回：从哪来就回哪去，实在没来路才退列表 ---- */
+  (function(){
+    var b = document.getElementById('backBtn');
+    if(!b) return;
+    b.addEventListener('click', function(e){
+      var r = '';
+      try{ r = document.referrer || ''; }catch(err){}
+      var same = r && (r.indexOf('/pages/') >= 0 || r.indexOf('github.io') >= 0 ||
+                       r.indexOf('127.0.0.1') >= 0 || r.indexOf('localhost') >= 0 ||
+                       r.indexOf('file://') === 0);
+      if(same && window.history && history.length > 1){
+        e.preventDefault();
+        if(e.stopImmediatePropagation) e.stopImmediatePropagation();
+        history.back();
+      }
+    });
+  })();
   /* ---- 写盘没完就先别跳页，别让最后几片被掐掉 ---- */
   document.addEventListener('click', function(e){
     var a = e.target && e.target.closest ? e.target.closest('a[href]') : null;
