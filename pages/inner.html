@@ -2405,6 +2405,20 @@
       if(on) localStorage.setItem('hearth_pod_playing','1');
       else localStorage.removeItem('hearth_pod_playing');
     }catch(e){}
+    try{
+      if(navigator.mediaSession){
+        if(on){
+          var t='VESPER';
+          try{ t=(cur&&(cur.name||cur.title))||'VESPER'; }catch(e2){}
+          if(window.MediaMetadata) navigator.mediaSession.metadata=new MediaMetadata({title:t,artist:'VESPER',album:'门内'});
+          navigator.mediaSession.playbackState='playing';
+          navigator.mediaSession.setActionHandler('play',function(){ try{ au.play(); }catch(e3){} });
+          navigator.mediaSession.setActionHandler('pause',function(){ try{ au.pause(); }catch(e3){} });
+        }else{
+          navigator.mediaSession.playbackState='paused';
+        }
+      }
+    }catch(e){}
   }
   au.addEventListener('play', function(){ markPlaying(true); });
   au.addEventListener('pause', function(){ markPlaying(false); });
