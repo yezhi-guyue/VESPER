@@ -85,14 +85,16 @@
 
   /* ---------- 下面：歌 ---------- */
   .body{padding:14px 18px 0}
-  .playall{padding:0 0 12px}
+  .playall{padding:0 0 14px;display:flex;justify-content:center}
   .playall button{
-    width:100%;height:42px;border-radius:15px;border:0;cursor:pointer;
-    font-family:inherit;font-size:11.5px;letter-spacing:.22em;text-indent:.22em;
-    color:#fff;background:#87929c;
-    box-shadow:0 10px 22px -14px rgba(80,92,104,.85),inset 0 0 0 1px rgba(255,255,255,.18);
+    width:auto;height:29px;padding:0 17px;border-radius:15px;cursor:pointer;
+    font-family:inherit;font-size:10.5px;letter-spacing:.18em;text-indent:.18em;
+    color:#9aa5ad;background:rgba(255,255,255,.62);
+    border:1px solid rgba(146,158,168,.20);
+    box-shadow:none;
+    -webkit-tap-highlight-color:transparent;
   }
-  .playall button:active{transform:scale(.99)}
+  .playall button:active{transform:scale(.985);background:rgba(255,255,255,.85)}
   .row{
     position:relative;display:flex;align-items:center;gap:13px;
     padding:8px 4px;border-radius:16px;
