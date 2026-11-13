@@ -39,10 +39,19 @@
     color:#a6b0b8;pointer-events:none;white-space:nowrap;
   }
   .top .ic{
-    width:30px;height:30px;border-radius:50%;
+    width:30px;height:30px;border-radius:0;
     display:flex;align-items:center;justify-content:center;
-    color:#5b666e;background:transparent;text-decoration:none;
+    color:#5b666e;background:transparent!important;text-decoration:none;
+    box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
     transform:translateY(-16px);
+  }
+  .top .brand{
+    font-size:13px;line-height:1;font-weight:500;
+    letter-spacing:.30em;text-indent:.30em;
+    color:#5b666e;opacity:.9;
+    margin-left:8px;
+    transform:translateY(-16px);
+    white-space:nowrap;
   }
   .top .ic svg{width:17px;height:17px;display:block}
   .two{position:relative;width:34px;height:22px}
@@ -650,6 +659,7 @@
   <a class="ic" id="backBtn" href="list.html" aria-label="返回">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
   </a>
+  <span class="brand">VESPER</span>
   <button class="ic" id="topSearch" aria-label="搜索">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round">
       <circle cx="10.8" cy="10.8" r="6.4"/>
@@ -778,7 +788,7 @@
 
 <div class="tab">
   <a href="list.html">搜索</a>
-  <div class="tabmid"><b>一起听</b></div>
+  <div class="tabmid"><b>共听</b></div>
   <a href="home.html?v=4">主页</a>
 </div>
 
