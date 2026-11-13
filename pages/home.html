@@ -281,6 +281,25 @@
     box-shadow:inset 0 0 0 1px rgba(203,212,219,.9);
   }
   .sheet .bgtools button.main{color:#fff;background:#7e8b96;box-shadow:none}
+  /* 网易云 cookie */
+  .ckrow{margin:8px 0 2px}
+  .ckstate{font-size:10px;letter-spacing:.10em;color:#9aa3aa;margin-bottom:8px}
+  .ckstate.on{color:#7e8b96}
+  .ckin{
+    width:100%;height:34px;box-sizing:border-box;padding:0 11px;
+    border-radius:12px;border:1px solid rgba(203,212,219,.95);
+    background:rgba(248,250,251,.96);
+    font-family:inherit;font-size:11px;color:#5f686f;letter-spacing:.02em;
+    outline:none;-webkit-appearance:none;
+  }
+  .ckin::placeholder{color:#bcc4ca;letter-spacing:.08em}
+  .ckin:focus{border-color:rgba(160,172,182,.9);background:#fff}
+  .ckbtn{
+    margin-top:9px;height:33px;padding:0 20px;border-radius:12px;border:0;cursor:pointer;
+    font-family:inherit;font-size:10.5px;letter-spacing:.16em;text-indent:.16em;
+    color:#fff;background:#7e8b96;
+  }
+  .ckbtn[disabled]{opacity:.55}
 
   /* 一行：左边缩略图 右边滑块 */
   .setrow{display:flex;align-items:center;gap:14px;margin:12px 0}
@@ -427,6 +446,13 @@
 <div class="sheet" id="sheet">
   <div class="hd">设 置<button class="x" id="setX" type="button" aria-label="收起">×</button></div>
 
+  <div class="lbl2">网 易 云</div>
+  <div class="ckrow">
+    <div class="ckstate" id="neState">正在看登录状态…</div>
+    <input class="ckin" id="ckIn" type="text" placeholder="粘 MUSIC_U或者整串 cookie" autocomplete="off" spellcheck="false">
+    <button class="ckbtn" id="ckSave" type="button">连 接</button>
+  </div>
+
   <div class="lbl2">头 像</div>
   <div class="avrow">
     <div class="avcell">
@@ -491,7 +517,7 @@
 
 <div class="tab">
   <a href="list.html">搜索</a>
-  <a href="listen.html?v=3" class="tabmid"><b>一起听</b></a>
+  <a href="listen.html?v=3" class="tabmid"><b>共听</b></a>
   <a href="home.html?v=4" class="cur">主页</a>
 </div>
 
@@ -965,7 +991,48 @@
   buildColors();
   applyTcol();
 
+  /* ---------- 网易云 cookie：填一颗新的 MUSIC_U，自己连上 ---------- */
+  var neEl = null, ckIn = null, ckBtn = null;
+  function neSay(t, ok){
+    if(!neEl) neEl = document.getElementById('neState');
+    if(!neEl) return;
+    neEl.textContent = t;
+    if(ok) neEl.classList.add('on'); else neEl.classList.remove('on');
+  }
+  function neCheck(){
+    neSay('正在看登录状态…');
+    fetch(API + '/music/netease/status').then(function(r){ return r.json(); }).then(function(d){
+      if(d && d.logged_in){ neSay('已连上 · ' + (d.nickname || '你的账号'), true); }
+      else{ neSay('没连上 · 登录态过期了 粘一颗新的 MUSIC_U'); }
+    }).catch(function(){ neSay('问不到后端'); });
+  }
+  function neConnect(){
+    if(!ckIn) ckIn = document.getElementById('ckIn');
+    if(!ckBtn) ckBtn = document.getElementById('ckSave');
+    var v = (ckIn.value || '').trim();
+    if(!v){ neSay('先把 cookie 粘进来'); ckIn.focus(); return; }
+    ckBtn.disabled = true; ckBtn.textContent = '连 接 中';
+    neSay('拿这颗 cookie 去问网易…');
+    fetch(API + '/music/netease/cookie', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ cookie: v })
+    }).then(function(r){ return r.json(); }).then(function(d){
+      ckBtn.disabled = false; ckBtn.textContent = '连 接';
+      if(d && d.ok){
+        neSay('连上了 · ' + (d.nickname || '你的账号'), true);
+        ckIn.value = '';
+        try{ paintPlaylists(0); }catch(e){}
+      }else{
+        neSay((d && d.msg) ? d.msg : '没连上');
+      }
+    }).catch(function(){
+      ckBtn.disabled = false; ckBtn.textContent = '连 接';
+      neSay('后端没应答');
+    });
+  }
+
   function openSet(){
+    neCheck();
     sheetAv();
     applyHero();
     applyBg();
@@ -979,6 +1046,10 @@
   }
 
   setBtn.addEventListener('click', openSet);
+  document.getElementById('ckSave').addEventListener('click', neConnect);
+  document.getElementById('ckIn').addEventListener('keydown', function(e){
+    if(e.key === 'Enter'){ e.preventDefault(); neConnect(); }
+  });
   setMask.addEventListener('click', closeSet);
   document.getElementById('setX').addEventListener('click', closeSet);
   document.getElementById('setDone').addEventListener('click', closeSet);
