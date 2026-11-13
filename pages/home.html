@@ -177,6 +177,26 @@
     flex:none;width:18px;text-align:right;
     font-size:10px;letter-spacing:.04em;color:#c3c9ce;
   }
+  .row .add{
+    flex:none;width:26px;height:26px;margin-left:4px;
+    border:0;border-radius:50%;padding:0;
+    display:flex;align-items:center;justify-content:center;
+    background:rgba(238,243,247,.92);color:#a9b4bc;
+    font-size:15px;line-height:1;font-family:inherit;
+    box-shadow:inset 0 0 0 1px rgba(205,214,221,.9);
+    transition:background .18s ease,color .18s ease;
+  }
+  .row .add:active{background:#e3ebf1;color:#7f8b94}
+  .toast{
+    position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 86px);
+    transform:translateX(-50%) translateY(8px);
+    padding:9px 16px;border-radius:999px;
+    background:rgba(78,88,98,.92);color:#f2f5f8;
+    font-size:11px;letter-spacing:.14em;text-indent:.14em;
+    opacity:0;pointer-events:none;transition:opacity .22s ease,transform .22s ease;
+    z-index:50;
+  }
+  .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 
   .hint{
     text-align:center;color:#bdb7af;
@@ -590,6 +610,7 @@
              '<span class="cv">' + cover + '</span>' +
              '<span class="tx"><b>' + esc(s.name || '未 知') + '</b><em>' + esc(s.artist || '') + '</em></span>' +
              '<span class="idx">' + (s.dur ? fmt(s.dur) : '') + '</span>' +
+             '<button class="add" type="button" data-add="' + i + '" aria-label="加入列表">+</button>' +
            '</div>';
   }
 
@@ -712,12 +733,53 @@
   });
 
   rList.addEventListener('click', function(e){
+    var addB = e.target.closest ? e.target.closest('.add') : null;
+    if(addB){
+      var arr0 = rList.__songs || [];
+      var s0 = arr0[+addB.getAttribute('data-add')];
+      if(s0) addToQueue(s0);
+      return;
+    }
     var row = e.target.closest ? e.target.closest('.row') : null;
     if(!row) return;
     var arr = rList.__songs || [];
     var s = arr[+row.getAttribute('data-i')];
     if(s) playMini(s);
   });
+  /* ---------- 加号：单加一首进一起听的列表 ---------- */
+  var toastEl = null, toastT = 0;
+  function toast(t){
+    if(!toastEl){
+      toastEl = document.createElement('div');
+      toastEl.className = 'toast';
+      document.body.appendChild(toastEl);
+    }
+    toastEl.textContent = t;
+    toastEl.classList.add('on');
+    clearTimeout(toastT);
+    toastT = setTimeout(function(){ toastEl.classList.remove('on'); }, 1600);
+  }
+  function addToQueue(s){
+    if(!s) return;
+    var id = s.songId != null ? s.songId : s.id;
+    if(id == null || id === ''){ toast('这 首 加 不 了'); return; }
+    try{ if(window.__LS_RELOAD) window.__LS_RELOAD(); }catch(e){}
+    var q = null;
+    try{ q = JSON.parse(localStorage.getItem('hearth_pod_queue') || ''); }catch(e){}
+    if(!q || !q.songs) q = { songs: [], at: 0 };
+    var k = String(id), dup = false, i;
+    for(i = 0; i < q.songs.length; i++){
+      var x = q.songs[i];
+      if(String(x.songId != null ? x.songId : x.id) === k){ dup = true; break; }
+    }
+    if(!dup){
+      q.songs.push({ songId: id, name: s.name || '', artist: s.artist || '', album: s.album || '', cover: s.cover || '' });
+      try{ localStorage.setItem('hearth_pod_queue', JSON.stringify(q)); }catch(e){}
+      try{ localStorage.removeItem('hearth_pod_empty'); }catch(e){}
+      try{ if(window.__LS_FLUSH) window.__LS_FLUSH(); }catch(e){}
+    }
+    toast(dup ? '列 表 里 已 经 有 了' : '已 加 入 列 表');
+  }
 
   /* 回到前台重新读一次，别拿着旧账本 */
   document.addEventListener('visibilitychange', function(){
