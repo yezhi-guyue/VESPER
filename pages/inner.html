@@ -1564,8 +1564,7 @@
 (function(){
   var b=document.getElementById('exitBtn');
   if(b) b.addEventListener('click',function(){
-    try{ sessionStorage.removeItem('hearth_inside'); }catch(err){}
-    try{ if(window.parent && window.parent.sessionStorage) window.parent.sessionStorage.removeItem('hearth_inside'); }catch(err){}
+    try{ localStorage.removeItem('hearth_inside'); }catch(err){}
     if(window.self!==window.top){
       try{ window.parent.postMessage({t:'hearth:exit'},'*'); }catch(err){}
       return;
@@ -2224,7 +2223,7 @@
     qi=((i%queue.length)+queue.length)%queue.length;
     cur=queue[qi]; paint();
     if(!keepSeek) pendingSeek=0;
-    saveCur(0);
+    if(!keepSeek) saveCur(0);
     getJSON('http://127.0.0.1:9090/music/url?id='+encodeURIComponent(cur.songId), function(d){
       if(!d) return;
       if(!d.ok){ n.textContent='放 不 了'; return; }
@@ -2401,9 +2400,21 @@
   pod.addEventListener('mouseleave', lpEnd);
 
   setIco(I_PLAY);
+  function markPlaying(on){
+    try{
+      if(on) localStorage.setItem('hearth_pod_playing','1');
+      else localStorage.removeItem('hearth_pod_playing');
+    }catch(e){}
+  }
+  au.addEventListener('play', function(){ markPlaying(true); });
+  au.addEventListener('pause', function(){ markPlaying(false); });
   window.addEventListener('pagehide', function(){ saveCur(); });
   document.addEventListener('visibilitychange', function(){ if(document.hidden) saveCur(); });
-  loadQueue();
+  var wantPlay=false;
+  try{ wantPlay = localStorage.getItem('hearth_pod_playing')==='1'; }catch(e){}
+  loadQueue(function(){
+    if(wantPlay){ try{ playAt(qi, true); }catch(e){} }
+  });
 })();
 </script>
 <script>
