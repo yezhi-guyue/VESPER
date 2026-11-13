@@ -142,9 +142,9 @@
     margin-top:-290px;
     border-radius:50%;
     background:
-      radial-gradient(circle, #4b4640 0 6%, transparent 6.2%),
-      repeating-radial-gradient(circle at 50% 50%, #5d5751 0 2px, #4f4a45 2px 4px),
-      #55504a;
+      radial-gradient(circle, #4e5862 0 6%, transparent 6.2%),
+      repeating-radial-gradient(circle at 50% 50%, #6c7987 0 2px, #5b6673 2px 4px),
+      #626d79;
     box-shadow:
       0 18px 40px rgba(110,125,140,.24),
       0 4px 12px rgba(110,125,140,.16),
@@ -196,7 +196,9 @@
     position:relative;flex:1;height:1px;background:rgba(170,183,195,.45);border-radius:1px;
   }
   .bar .fg{
-    position:absolute;left:0;top:0;bottom:0;width:0%;
+    position:absolute;left:0;top:0;bottom:0;width:100%;
+    transform:scaleX(0);transform-origin:0 50%;
+    will-change:transform;
     background:linear-gradient(90deg,rgba(120,138,155,.75),rgba(160,178,193,.9));
     border-radius:1px;
   }
@@ -204,6 +206,7 @@
     position:absolute;top:50%;left:0;width:7px;height:7px;margin:-3.5px 0 0 -3.5px;
     border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(120,135,148,.38);
     border:.5px solid rgba(178,190,201,.7);
+    transform:translateX(0);will-change:transform;
   }
   .bar .hit{position:absolute;left:-6px;right:-6px;top:-11px;bottom:-11px}
   .tm{font-size:8.5px;letter-spacing:.02em;color:#aab3bb;min-width:26px;text-align:center}
@@ -1151,6 +1154,7 @@
 
   /* ---------- 进度记录 ---------- */
   var flushT = 0;
+  var lastQStr = '';
   function saveCur(force, tSet){
     if(!cur) return;
     var pos = (typeof tSet === 'number') ? tSet : (au.currentTime || 0);
@@ -1159,7 +1163,14 @@
         id: cur.songId || cur.id, name: cur.name, artist: cur.artist,
         cover: cur.cover, t: Math.floor(pos), at: Date.now()
       }));
-      localStorage.setItem('hearth_pod_queue', JSON.stringify({ songs: queue, at: qi }));
+    }catch(e){}
+    /* 队列那一坨几百 K，没必要每五秒重写一遍，没变就不动它 */
+    try{
+      var qs = JSON.stringify({ songs: queue, at: qi });
+      if(qs !== lastQStr){
+        localStorage.setItem('hearth_pod_queue', qs);
+        lastQStr = qs;
+      }
     }catch(e){}
     /* bridge 是存内存的，得催它落盘，不然下次进来还是旧歌 */
     var n = Date.now();
@@ -1481,11 +1492,19 @@
     if(!dragging) paintProgress();
   });
 
+  /* 进度条走 transform，别再让每 250 毫秒改一次宽度引发整页重排 */
+  var barW = 0;
+  function updBarW(){ try{ barW = bar.clientWidth || 0; }catch(e){ barW = 0; } }
+  updBarW();
+  window.addEventListener('resize', updBarW);
+  setTimeout(updBarW, 300);
+
   function paintProgress(){
     var d = au.duration || 0, t = au.currentTime || 0;
-    var p = d ? (t/d*100) : 0;
-    fg.style.width = p + '%';
-    kn.style.left = p + '%';
+    var p = d ? (t/d) : 0;
+    if(p < 0) p = 0; if(p > 1) p = 1;
+    fg.style.transform = 'scaleX(' + p + ')';
+    kn.style.transform = 'translateX(' + (p * barW) + 'px)';
     tc.textContent = mmss(t);
     document.getElementById('tt').textContent = d ? mmss(d) : '--:--';
   }
@@ -1516,8 +1535,10 @@
   var hit = document.getElementById('hit');
   function seekTo(clientX, commit){
     var r = bar.getBoundingClientRect();
+    barW = r.width || barW;
     var p = Math.max(0, Math.min(1, (clientX - r.left) / r.width));
-    fg.style.width = (p*100) + '%'; kn.style.left = (p*100) + '%';
+    fg.style.transform = 'scaleX(' + p + ')';
+    kn.style.transform = 'translateX(' + (p * barW) + 'px)';
     tc.textContent = mmss(p * (au.duration||0));
     if(commit && au.duration){ try{ au.currentTime = p * au.duration; }catch(e){} }
   }
