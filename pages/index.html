@@ -970,9 +970,16 @@
   /* 小锁：没密码 点一下进去 */
   const lockBtn=$('lockBtn');
   let doorEl=null, doorBusy=false;
+  function insideMark(v){
+    try{
+      if(v) sessionStorage.setItem('hearth_inside','1');
+      else sessionStorage.removeItem('hearth_inside');
+    }catch(err){}
+  }
   function openInner(){
     if(doorEl||doorBusy) return;
     doorBusy=true;
+    insideMark(true);
     const d=document.createElement('div');
     d.className='door';
     const fr=document.createElement('iframe');
@@ -1003,6 +1010,7 @@
   window.addEventListener('message',function(e){
     const m=e.data;
     if(!m||(m.t!=='hearth:exit' && m.t!=='hearth:back')) return;
+    insideMark(false);
     if(!doorEl) return;
     doorEl.classList.remove('on');
     document.body.classList.remove('doorOpen');
@@ -1013,6 +1021,10 @@
     lockBtn.classList.add('open');
     setTimeout(openInner,60);
   });
+  /* 上次没出门：回到主页就直接还在里面 */
+  let wasInside=false;
+  try{ wasInside = sessionStorage.getItem('hearth_inside')==='1'; }catch(err){}
+  if(wasInside){ setTimeout(function(){ if(lockBtn) lockBtn.classList.add('open'); openInner(); },120); }
 
   /* 起始日 */
   $('startIn').addEventListener('change',()=>{
