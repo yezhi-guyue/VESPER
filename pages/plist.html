@@ -286,16 +286,30 @@
   }
 
   function get(url, cb){
-    var x = new XMLHttpRequest();
-    x.open('GET', url, true);
-    x.timeout = 12000;
-    x.onload = function(){
-      var d = null;
-      try{ d = JSON.parse(x.responseText); }catch(e){}
-      cb(d);
-    };
-    x.onerror = x.ontimeout = function(){ cb(null); };
-    x.send();
+    var tries = 0;
+    function run(){
+      tries++;
+      var x = new XMLHttpRequest();
+      x.open('GET', url, true);
+      x.timeout = 30000;
+      x.onload = function(){
+        var d = null;
+        try{ d = JSON.parse(x.responseText); }catch(e){}
+        if(d && d.ok){ cb(d); return; }
+        if(tries < 3){ setTimeout(run, 500); return; }
+        cb(d);
+      };
+      x.onerror = function(){
+        if(tries < 3){ setTimeout(run, 500); return; }
+        cb(null);
+      };
+      x.ontimeout = function(){
+        if(tries < 3){ setTimeout(run, 500); return; }
+        cb(null);
+      };
+      x.send();
+    }
+    run();
   }
 
   /* ---------- 顶部那张图 ---------- */
