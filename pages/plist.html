@@ -432,10 +432,39 @@
     toast(dup ? '列 表 里 已 经 有 了' : '已 加 入 列 表');
   }
 
-  /* 全部播放：只从第一首开始放，不再把整张歌单塞进一起听的列表 */
+  /* 全部播放：整张歌单推进一起听的列表（去重），然后从第一首开始放 */
   document.getElementById('playAll').addEventListener('click', function(){
     if(!songs.length) return;
-    toListen(songs[0]);
+    try{ if(window.__LS_RELOAD) window.__LS_RELOAD(); }catch(e){}
+    var q = null;
+    try{ q = JSON.parse(localStorage.getItem('hearth_pod_queue') || 'null'); }catch(e){}
+    if(!q || !q.songs) q = { songs: [], at: 0 };
+    var seen = {};
+    q.songs.forEach(function(s){
+      var sid = s.songId != null ? s.songId : s.id;
+      if(sid != null) seen[String(sid)] = 1;
+    });
+    var added = 0;
+    songs.forEach(function(s){
+      var sid = s.songId != null ? s.songId : s.id;
+      var id = String(sid == null ? '' : sid);
+      if(!id || seen[id]) return;
+      seen[id] = 1;
+      added++;
+      q.songs.push({
+        songId: sid,
+        name: s.name || '', artist: s.artist || '',
+        album: s.album || '', cover: s.cover || ''
+      });
+    });
+    try{
+      localStorage.setItem('hearth_pod_queue', JSON.stringify({ songs: q.songs, at: 0 }));
+      localStorage.removeItem('hearth_pod_empty');
+    }catch(e){}
+    try{ if(window.__LS_FLUSH) window.__LS_FLUSH(); }catch(e){}
+    toast(added ? '加 了 ' + added + ' 首' : '列 表 里 都 有 了');
+    var first = songs[0];
+    setTimeout(function(){ toListen(first); }, 260);
   });
 
   if(!pid){
