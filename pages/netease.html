@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<script src="ls.js"></script>
+<script src="bridge.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#fdfcfa">
+<meta name="color-scheme" content="light">
+<title>网易云</title>
+<style>
+  :root{--st:max(env(safe-area-inset-top),30px);--sb:env(safe-area-inset-bottom,0px)}
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html{height:100%;background:#fbfcfd;color-scheme:light}
+  html,body{overflow-x:hidden}
+  body{
+    min-height:100vh;
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Noto Sans CJK SC",sans-serif;
+    color:#474c50;
+    background:linear-gradient(#fbfcfd 0%, #f4f6f8 100%);
+    animation:pin .5s ease both;
+  }
+  @keyframes pin{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+  /* ---------- 置顶灰栏 ---------- */
+  .topbar{
+    position:fixed;left:0;right:0;top:0;z-index:20;
+    padding:var(--st) 18px 0;
+    height:calc(var(--st) + 20px);
+    display:flex;align-items:center;justify-content:space-between;
+    background:rgba(214,221,227,.94);
+    backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    box-shadow:0 1px 0 rgba(168,180,190,.75);
+  }
+  .ic{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#5b666e;text-decoration:none;transform:translateY(-16px)}
+  .ic svg{width:17px;height:17px;display:block}
+  .bnote{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:18px;height:18px;color:#68727a;pointer-events:none}
+  .bnote svg{width:100%;height:100%;display:block}
+  /* ---------- 主体 ---------- */
+  .body{padding:calc(var(--st) + 46px) 22px calc(var(--sb) + 40px);max-width:620px;margin:0 auto}
+  .sec{font-size:9.5px;letter-spacing:.34em;color:#a9b2b9;margin:0 0 14px 2px;font-weight:300}
+  .card{
+    background:rgba(255,255,255,.66);
+    border:1px solid rgba(146,158,168,.16);
+    border-radius:18px;
+    padding:22px 20px 20px;
+    display:flex;flex-direction:column;align-items:center;
+  }
+  .qrwrap{
+    width:186px;height:186px;border-radius:14px;
+    background:#fff;border:1px solid rgba(146,158,168,.18);
+    display:flex;align-items:center;justify-content:center;
+    overflow:hidden;position:relative;
+  }
+  .qrwrap img{width:100%;height:100%;object-fit:contain;display:none}
+  .qrwrap img.on{display:block}
+  .qrwrap .ph{font-size:10px;letter-spacing:.22em;color:#b6bec4}
+  .qrwrap.dead img{opacity:.14}
+  .qrwrap .dead{display:none;position:absolute;inset:0;align-items:center;justify-content:center;font-size:10.5px;letter-spacing:.2em;color:#8b959c}
+  .qrwrap.dead .dead{display:flex}
+  .st{margin:16px 0 0;font-size:11px;letter-spacing:.16em;color:#8b959c;min-height:16px;text-align:center;line-height:1.7}
+  .st b{color:#5b666e;font-weight:400}
+  .mini{
+    margin:16px 0 0;display:flex;gap:10px;
+  }
+  .mini button{
+    font-family:inherit;font-size:10.5px;letter-spacing:.18em;text-indent:.18em;
+    height:31px;padding:0 18px;border-radius:16px;cursor:pointer;
+    color:#8b959c;background:rgba(255,255,255,.72);
+    border:1px solid rgba(146,158,168,.22);
+  }
+  .mini button:active{background:rgba(255,255,255,.95);transform:scale(.985)}
+  /* ---------- 手动填 ---------- */
+  .manual{margin:26px 0 0}
+  .ckin{
+    width:100%;height:38px;border-radius:12px;
+    border:1px solid rgba(146,158,168,.2);background:rgba(255,255,255,.66);
+    padding:0 13px;font-family:inherit;font-size:11px;color:#5b666e;
+    letter-spacing:.02em;outline:none;
+  }
+  .ckin::placeholder{color:#b6bec4}
+  .ckin:focus{border-color:rgba(146,158,168,.42);background:rgba(255,255,255,.9)}
+  .ckrow{display:flex;gap:10px;margin:11px 0 0;align-items:center}
+  .ckbtn{
+    font-family:inherit;font-size:10.5px;letter-spacing:.18em;text-indent:.18em;
+    height:32px;padding:0 18px;border-radius:16px;cursor:pointer;flex:0 0 auto;
+    color:#8b959c;background:rgba(255,255,255,.72);
+    border:1px solid rgba(146,158,168,.22);
+  }
+  .ckbtn:active{background:rgba(255,255,255,.95);transform:scale(.985)}
+  .ckstate{font-size:10px;letter-spacing:.1em;color:#a9b2b9;line-height:1.6}
+  .tip{margin:16px 4px 0;font-size:9.5px;letter-spacing:.08em;color:#b0b8be;line-height:2}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <a class="ic" href="home.html" aria-label="返回">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+  </a>
+  <div class="bnote">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="12" cy="12" r="8.4"/><path d="M9.6 15.4c1.6 1 3.6 1 5.2 0"/><circle cx="9.4" cy="10" r=".9" fill="currentColor" stroke="none"/><circle cx="14.6" cy="10" r=".9" fill="currentColor" stroke="none"/></svg>
+  </div>
+  <span class="ic" aria-hidden="true"></span>
+</div>
+
+<div class="body">
+  <div class="sec">网 易 云</div>
+
+  <div class="card">
+    <div class="qrwrap" id="qrwrap">
+      <span class="ph" id="qrph">在 取 码</span>
+      <img id="qrimg" alt="登录二维码">
+      <span class="dead">已 失 效</span>
+    </div>
+    <p class="st" id="st">用网易云 App 扫一下 确认登录</p>
+    <div class="mini">
+      <button id="refBtn" type="button">换 一 张</button>
+      <button id="backBtn" type="button">回 主 页</button>
+    </div>
+  </div>
+
+  <div class="manual">
+    <div class="sec">或 者 手 动 填</div>
+    <input class="ckin" id="ckin" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="粘 MUSIC_U 或整串 cookie">
+    <div class="ckrow">
+      <span class="ckstate" id="ckstate">还 没 查</span>
+      <button class="ckbtn" id="ckbtn" type="button">连 接</button>
+    </div>
+    <p class="tip">MUSIC_U 从浏览器里拿 登录 music.163.com 按 F12 在 Application → Cookies 里找那一行 整串复制过来也行 只认它自家服务器 不往外发</p>
+  </div>
+</div>
+
+<script>
+(function(){
+  var API = 'http://127.0.0.1:9090';
+  var qrwrap = document.getElementById('qrwrap');
+  var qrimg = document.getElementById('qrimg');
+  var qrph = document.getElementById('qrph');
+  var st = document.getElementById('st');
+  var refBtn = document.getElementById('refBtn');
+  var backBtn = document.getElementById('backBtn');
+  var ckin = document.getElementById('ckin');
+  var ckbtn = document.getElementById('ckbtn');
+  var ckstate = document.getElementById('ckstate');
+
+  var curKey = '';
+  var timer = null;
+  var done = false;
+
+  function say(t){ st.innerHTML = t; }
+
+  function stop(){
+    if(timer){ clearInterval(timer); timer = null; }
+  }
+
+  function newQr(){
+    if(done) return;
+    stop();
+    curKey = '';
+    qrwrap.classList.remove('dead');
+    qrimg.classList.remove('on');
+    qrph.style.display = '';
+    qrph.textContent = '在 取 码';
+    say('用网易云 App 扫一下 确认登录');
+    fetch(API + '/music/netease/qr/new', {cache:'no-store'}).then(function(r){ return r.json(); }).then(function(d){
+      if(!d || !d.key){ qrph.textContent = '取 码 失 败'; return; }
+      curKey = d.key;
+      qrimg.onload = function(){ qrimg.classList.add('on'); qrph.style.display = 'none'; };
+      qrimg.onerror = function(){ qrph.style.display = ''; qrph.textContent = '出 图 失 败'; };
+      qrimg.src = API + '/music/netease/qr/png?key=' + encodeURIComponent(curKey) + '&t=' + Date.now();
+      tick();
+      timer = setInterval(tick, 2200);
+    }).catch(function(){
+      qrph.textContent = '连 不 上 服 务';
+      say('后端没应 稍后再试');
+    });
+  }
+
+  function tick(){
+    if(!curKey || done) return;
+    fetch(API + '/music/netease/qr/check?key=' + encodeURIComponent(curKey), {cache:'no-store'})
+      .then(function(r){ return r.json(); }).then(function(d){
+        if(!d) return;
+        var c = d.code;
+        if(c === 800){ stop(); qrwrap.classList.add('dead'); say('码 过 期 了 换 一 张 就 好'); return; }
+        if(c === 801){ say('等 你 扫'); return; }
+        if(c === 802){ say('扫 到 了 手 机 上 点 一 下 确 认'); return; }
+        if(c === 803){
+          stop(); done = true;
+          var nm = d.nickname || '';
+          say('连 上 了' + (nm ? ' · <b>' + nm + '</b>' : '') + '<br>歌单在回来的路上');
+          qrwrap.classList.add('dead');
+          ckstate.textContent = '已 连 上';
+          setTimeout(function(){ location.href = 'home.html'; }, 1400);
+          return;
+        }
+        say(d.message || '等 一 下');
+      }).catch(function(){});
+  }
+
+  function check(){
+    fetch(API + '/music/netease/status', {cache:'no-store'}).then(function(r){ return r.json(); }).then(function(d){
+      if(d && d.logged_in){ ckstate.textContent = '已 连 上' + (d.nickname ? ' · ' + d.nickname : ''); }
+      else { ckstate.textContent = '还 没 连'; }
+    }).catch(function(){ ckstate.textContent = '连 不 上 服 务'; });
+  }
+
+  function connect(){
+    var v = (ckin.value || '').trim();
+    if(!v){ ckstate.textContent = '先 粘 一 串 进 来'; return; }
+    ckstate.textContent = '在 问 网 易 …';
+    ckbtn.disabled = true;
+    fetch(API + '/music/netease/cookie', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({cookie: v})
+    }).then(function(r){ return r.json(); }).then(function(d){
+      ckbtn.disabled = false;
+      if(d && d.ok){
+        ckstate.textContent = '连 上 了' + (d.nickname ? ' · ' + d.nickname : '');
+        ckin.value = ''; ckin.blur();
+        say('连 上 了' + (d.nickname ? ' · <b>' + d.nickname + '</b>' : '') + '<br>歌单在回来的路上');
+        done = true; stop();
+      } else {
+        ckstate.textContent = (d && d.msg) || '没 连 上';
+      }
+    }).catch(function(){
+      ckbtn.disabled = false;
+      ckstate.textContent = '连 不 上 服 务';
+    });
+  }
+
+  refBtn.addEventListener('click', function(){ done = false; newQr(); });
+  backBtn.addEventListener('click', function(){ location.href = 'home.html'; });
+  ckbtn.addEventListener('click', connect);
+  ckin.addEventListener('keydown', function(e){ if(e.key === 'Enter'){ e.preventDefault(); connect(); } });
+
+  check();
+  newQr();
+})();
+</script>
+</body>
+</html>
