@@ -1564,6 +1564,8 @@
 (function(){
   var b=document.getElementById('exitBtn');
   if(b) b.addEventListener('click',function(){
+    try{ sessionStorage.removeItem('hearth_inside'); }catch(err){}
+    try{ if(window.parent && window.parent.sessionStorage) window.parent.sessionStorage.removeItem('hearth_inside'); }catch(err){}
     if(window.self!==window.top){
       try{ window.parent.postMessage({t:'hearth:exit'},'*'); }catch(err){}
       return;
