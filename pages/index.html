@@ -972,8 +972,8 @@
   let doorEl=null, doorBusy=false;
   function insideMark(v){
     try{
-      if(v) sessionStorage.setItem('hearth_inside','1');
-      else sessionStorage.removeItem('hearth_inside');
+      if(v) localStorage.setItem('hearth_inside','1');
+      else localStorage.removeItem('hearth_inside');
     }catch(err){}
   }
   function openInner(){
@@ -1023,7 +1023,7 @@
   });
   /* 上次没出门：回到主页就直接还在里面 */
   let wasInside=false;
-  try{ wasInside = sessionStorage.getItem('hearth_inside')==='1'; }catch(err){}
+  try{ wasInside = localStorage.getItem('hearth_inside')==='1'; }catch(err){}
   if(wasInside){ setTimeout(function(){ if(lockBtn) lockBtn.classList.add('open'); openInner(); },120); }
 
   /* 起始日 */
